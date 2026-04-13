@@ -133,21 +133,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
         crossorigin="anonymous"></script>
-    <script>
-        const navbar = document.getElementById('mainNavbar');
-        const navLogo = document.getElementById('navLogo');
-        const registerImage = document.querySelector('.nav-register-image');
 
-        function updateNavbarOnScroll() {
-            const isScrolled = window.scrollY > 10;
-            navbar.classList.toggle('navbar-scrolled', isScrolled);
-            navLogo.src = isScrolled ? navLogo.dataset.logoScroll : navLogo.dataset.logoDefault;
-            registerImage.src = isScrolled ? registerImage.dataset.registerScroll : registerImage.dataset.registerDefault;
-        }
-
-        window.addEventListener('scroll', updateNavbarOnScroll);
-        updateNavbarOnScroll();
-    </script>
+        <script src="/JS/nav.js"></script>
 </body>
 
 </html>
