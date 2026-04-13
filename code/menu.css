@@ -1,0 +1,118 @@
+@import url('https://fonts.googleapis.com/css2?family=Playball&family=Montserrat:wght@300;400;600&display=swap');
+
+/* Navbar */
+#mainNavbar {
+    background-color: #1a2f4b;
+    padding: 10px 0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.yaku-font {
+    font-family: 'Playball', cursive;
+    color: white;
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+.rest-font {
+    color: white;
+    font-size: 0.55rem;
+    letter-spacing: 2px;
+    margin-left: 15px;
+}
+
+.nav-link {
+    color: rgba(255, 255, 255, 0.8) !important;
+    font-size: 0.75rem;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+}
+
+.nav-link.active {
+    color: white !important;
+    border-bottom: 2px solid white;
+}
+
+/* Botón Registro */
+.btn-register-small {
+    background: transparent;
+    border: none;
+    color: white;
+    display: flex;
+    align-items: center;
+    font-size: 0.75rem;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.reg-icon-nav {
+    width: 20px;
+    margin-right: 8px;
+}
+
+/* Header Carta */
+.carta-header {
+    margin-top: 60px;
+    background: linear-gradient(rgba(255,255,255,0.2), rgba(255,255,255,0.2)), 
+                url('../img/mesa.jpg') center/cover no-repeat;
+    padding: 80px 0;
+}
+
+.titulo-carta {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 300;
+    font-size: 4rem;
+    color: #333;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+}
+
+/* Círculos de Categorías */
+.categoria-circulo {
+    width: 140px;
+    height: 140px;
+    background: rgba(30, 25, 20, 0.95); /* Color oscuro como la imagen */
+    border-radius: 50%;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+}
+
+.categoria-circulo span {
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.categoria-circulo:hover {
+    transform: translateY(-5px);
+    background: #1a2f4b; /* Cambia a azul institucional al pasar el mouse */
+}
+
+/* Botones PDF */
+.btn-pdf {
+    padding: 10px 20px;
+    border: 1px solid #ddd;
+    color: #666;
+    text-decoration: none;
+    font-size: 0.7rem;
+    font-family: 'Montserrat', sans-serif;
+    background: white;
+}
+
+.btn-pdf:hover {
+    background: #1a2f4b;
+    color: white;
+    border-color: #1a2f4b;
+}
+
+@media (max-width: 768px) {
+    .titulo-carta { font-size: 2.5rem; }
+    .categoria-circulo { width: 110px; height: 110px; }
+}
