@@ -174,3 +174,56 @@ body {
 .lead {
     font-size: 1.25rem;
 }
+
+.titulo-carta {
+    font-family: 'Montserrat', sans-serif; /* Asegúrate de tener esta fuente o usa una similar */
+    font-weight: 300;
+    font-size: 4rem;
+    color: #eae3e3;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+}
+
+.categoria-circulo {
+    width: 140px;
+    height: 140px;
+    background: #1b3a57(84, 54, 252, 0.9); /* Marrón oscuro con ligera transparencia */
+    border-radius: 50%;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.categoria-circulo span {
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-align: center;
+    line-height: 1.2;
+}
+
+.categoria-circulo:hover {
+    transform: translateY(-5px);
+    background-color: #1a2f4b; /* El azul de tu navbar */
+}
+
+.btn-pdf {
+    padding: 10px 20px;
+    border: 1px solid #1b3a57;
+    color: #0b0909;
+    text-decoration: none;
+    font-size: 0.75rem;
+    background: #1b3a57;
+    transition: 0.3s;
+}
+
+.btn-pdf:hover {
+    background: #f8f8f8;
+    color: #1a2f4b;
+    border-color: #1a2f4b;
+}
