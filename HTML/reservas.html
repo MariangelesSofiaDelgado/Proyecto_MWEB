@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="../CSS/style.css">
+    <title>Yaku Sabor - restaurant </title>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <div class="Fondo">
+        <nav class="navbar navbar-expand-lg fixed-top" id="mainNavbar">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="index.html">
+                    <img src="../img/ICON1.png" alt="logo" id="navLogo" data-logo-default="../img/ICON1.png"
+                        data-logo-scroll="../img/icon2.png" />
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav mx-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page" href="index.html">INICIO</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page" href="menu.html">MENÚ</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page" href="promociones.html">PROMOCIONES</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page" href="acercade.html">ACERCA DE</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page" href="reservas.html">RESERVAS</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page" href="Contacto.html">CONTACTO</a>
+                        </li>
+                    </ul>
+                    <div class="navbar-actions">
+                        <button type="button" class="nav-link nav-register-btn" aria-label="Registro" data-bs-toggle="modal"
+                            data-bs-target="#registroModal">
+                            <img src="../img/register1.png" alt="Registrar" class="nav-register-image nav-register-default"
+                                data-register-default="../img/register1.png" data-register-scroll="../img/register2.png" />
+                            <span>Inicia Sesión</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <!--Formulario de Inicio de Sesión-->
+        <div class="modal fade" id="registroModal" tabindex="-1" aria-labelledby="registroModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="registroModalLabel">Iniciar Sesión</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="mb-3">
+                                <label for="exampleInputEmail1" class="form-label">Correo electrónico</label>
+                                <input type="email" class="form-control" id="exampleInputEmail1"
+                                    aria-describedby="emailHelp" required>
+                                <div id="emailHelp" class="form-text">Nunca compartiremos tu correo con nadie más.</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="exampleInputPassword1" class="form-label">Contraseña</label>
+                                <input type="password" class="form-control" id="exampleInputPassword1" required>
+                            </div>
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="exampleCheck1">
+                                <label class="form-check-label" for="exampleCheck1">Recordarme</label>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Iniciar sesión</button>
+                        </form>
+                    </div>
+                    <div class="modal-footer d-flex justify-content-between">
+                        <a href="#" class="text-decoration-none text-muted small">¿Olvidaste tu contraseña?</a>
+                        <a href="#" class="text-decoration-none small">¿No tienes cuenta? <strong>Regístrate</strong></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--Zona de reservas-->
+        <div class="container text-center mb-4">
+            <h1 class="display-4">Reserva tu mesa</h1>
+            <p class="lead">¡Asegura tu lugar en Yaku Sabor! Reserva tu mesa con anticipación para disfrutar de una experiencia culinaria inolvidable.</p>
+            <a href="#" class="btn btn-primary btn-lg">Reservar Ahora</a>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+            crossorigin="anonymous"></script>
+    </div>
+</body>
+
+</html>

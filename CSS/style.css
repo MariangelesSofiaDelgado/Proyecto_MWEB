@@ -5,7 +5,7 @@
 }
 
 body {
-    padding-top: 96px;
+    padding-top: 60px;
 }
 
 .navbar.navbar-scrolled {
@@ -113,7 +113,7 @@ body {
 
 .banner {
     width: 100%;
-    height: min(900px, 200vh);
+    height: min(600px, 80vh);
     overflow: hidden; /* evita que sobresalga */
 }
 
@@ -121,7 +121,7 @@ body {
     width: 100%;
     height: 100%;
     object-fit: cover; /* 🔥 clave */
-    object-position: center;
+    object-position: bottom;
 }
 
 .contenedor {
@@ -142,4 +142,35 @@ body {
 .card:hover {
     transform: translateY(-5px);
     box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/*------------------Estilos para las demas paginas------------------------------*/
+
+.Fondo {
+    display: flex;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.678), rgba(0, 0, 0, 0.582)), url('../img/ceviche-desktop.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    min-height: 100vh;
+}
+
+.text-center {
+    color: #ffffff;
+    text-align: center;
+}
+
+.text-center.mb-4{
+    padding-top: 70px;
+}
+
+.display-4 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    padding-top: 70px;
+}
+
+.lead {
+    font-size: 1.25rem;
 }
