@@ -1,0 +1,29 @@
+
+*{
+    box-sizing: border-box;
+}
+
+
+
+.cajaa{
+display: flex;
+justify-content: center;
+align-items: center;
+text-align: center;
+gap: 1px;
+height: 80%;
+flex-wrap: wrap;
+margin: 1em;
+}
+body{
+    background: rgb(245, 245, 234);
+}
+
+.Titulo{
+width: 500px;
+
+}
+
+img{
+    border-radius: 15px;
+}
