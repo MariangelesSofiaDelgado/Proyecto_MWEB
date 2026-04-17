@@ -1,0 +1,14 @@
+* {
+    box-sizing: border-box;
+    color: aliceblue;
+}
+
+body {
+    margin: 0 0 0 0;
+    padding: 70px 0 0 0;
+    background: rgb(245, 245, 234);
+}
+
+img, iframe {
+    border-radius: 15px; /* Aprovechamos para redondear también el mapa */
+}
