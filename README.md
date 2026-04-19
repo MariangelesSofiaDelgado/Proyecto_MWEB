@@ -7,3 +7,5 @@ Comandos para "pushear" archivo desde la terminal
 - git commit -m "(mensaje)"
 - git branch -M main
 - git push -u origin main
+
+....
