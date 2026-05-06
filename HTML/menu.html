@@ -94,35 +94,74 @@
         </div>
 
         <div class="container mt-5 pt-5 text-center">
-            <h1 class="titulo-carta mb-5">La Carta</h1>
-            
+            <h1 class="titulo-carta mb-4">La Carta</h1>
+            <p class="section-subtitle text-on-dark">Explora nuestra selección marina. Haz clic en cada categoría para
+                elegir tus platos favoritos y armar tu pedido.</p>
+
             <div class="row justify-content-center mt-4">
                 <div class="col-6 col-md-2 mb-4">
-                    <div class="categoria-circulo"><span>PIQUEOS & ENTRADAS</span></div>
+                    <button class="categoria-btn" type="button" data-category="piqueos">
+                        <div class="categoria-circulo"><span>PIQUEOS & ENTRADAS</span></div>
+                    </button>
                 </div>
                 <div class="col-6 col-md-2 mb-4">
-                    <div class="categoria-circulo"><span>SÁNDWICHES</span></div>
+                    <button class="categoria-btn" type="button" data-category="sandwiches">
+                        <div class="categoria-circulo"><span>SÁNDWICHES</span></div>
+                    </button>
                 </div>
                 <div class="col-6 col-md-2 mb-4">
-                    <div class="categoria-circulo"><span>PLATOS DE FONDO</span></div>
+                    <button class="categoria-btn" type="button" data-category="fondos">
+                        <div class="categoria-circulo"><span>PLATOS DE FONDO</span></div>
+                    </button>
                 </div>
                 <div class="col-6 col-md-2 mb-4">
-                    <div class="categoria-circulo"><span>POSTRES</span></div>
+                    <button class="categoria-btn" type="button" data-category="postres">
+                        <div class="categoria-circulo"><span>POSTRES</span></div>
+                    </button>
                 </div>
                 <div class="col-6 col-md-2 mb-4">
-                    <div class="categoria-circulo"><span>BEBIDAS</span></div>
-                </div>
-                <div class="col-6 col-md-2 mb-4">
-                    <div class="categoria-circulo"><span>DESAYUNO & BRUNCH</span></div>
+                    <button class="categoria-btn" type="button" data-category="bebidas">
+                        <div class="categoria-circulo"><span>BEBIDAS</span></div>
+                    </button>
                 </div>
             </div>
 
-            <div class="row mt-5">
-                <div class="col-12 d-flex flex-wrap justify-content-center gap-2 pb-5">
-                    <a href="#" class="btn-pdf">CARTA PRINCIPAL (PDF)</a>
-                    <a href="#" class="btn-pdf">POSTRES (PDF)</a>
-                    <a href="#" class="btn-pdf">CARTA VEGANA Y GLUTEN-FREE (PDF)</a>
-                    <a href="#" class="btn-pdf">CARTA NIÑOS (PDF)</a>
+            <div class="row justify-content-center mt-4 pb-5">
+                <div class="col-lg-8">
+                    <div class="menu-cart text-start">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                            <div>
+                                <h4 class="mb-1">Tu carrito marino</h4>
+                                <p class="mb-0 text-muted">Selecciona platos desde las categorías y arma tu pedido.</p>
+                            </div>
+                            <div class="text-md-end">
+                                <span class="cart-total-label">Total</span>
+                                <h3 class="cart-total" id="cartTotal">S/ 0.00</h3>
+                            </div>
+                        </div>
+                        <div class="footer-line"></div>
+                        <ul class="list-unstyled" id="cartItems">
+                            <li class="text-muted">Aún no agregas platos.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="menuModal" tabindex="-1" aria-labelledby="menuModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content menu-modal">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="menuModalLabel">Selecciona tus platos</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-muted mb-4" id="menuModalDescription">Marca los platos que quieres añadir al carrito.</p>
+                        <div class="list-group" id="menuItems"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Listo</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -131,6 +170,8 @@
             integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
             crossorigin="anonymous"></script>
     </div>
-            <script src="/JS/nav.js"></script>
+    <script src="/JS/nav.js"></script>
+    <script src="/JS/menu.js"></script>
 </body>
+
 </html>
