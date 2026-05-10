@@ -1,4 +1,3 @@
-// Menú: gestiona categorías, modal y carrito.
 const menuData = {
     piqueos: {
         title: "Piqueos & Entradas",

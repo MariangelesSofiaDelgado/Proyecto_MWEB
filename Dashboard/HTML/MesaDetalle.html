@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detalle de Mesa</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link rel="stylesheet" href="../CSS/styledash.css">
+</head>
+
+<body>
+  <div class="container my-4">
+    <div class="mesa-detail-hero mb-4">
+      <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+        <div>
+          <span class="badge bg-light text-dark mb-2">Mesa activa</span>
+          <h2 id="mesa-title" class="mb-2">MESA A1</h2>
+          <p class="mb-0">Selecciona productos por categoría para esta mesa.</p>
+        </div>
+        <a href="Gestion DeSala.html" class="btn btn-light fw-semibold">Volver</a>
+      </div>
+    </div>
+
+    <div class="row g-4 align-items-start">
+      <div class="col-12 col-lg-4">
+        <div class="card ticket-card h-100">
+          <div class="card-header ticket-header d-flex justify-content-between align-items-center">
+            <span>Ticket</span>
+            <button id="clear-ticket" type="button" class="btn btn-sm btn-outline-light">Limpiar</button>
+          </div>
+          <div class="card-body ticket-body">
+            <div class="ticket-meta mb-3">
+              <div><strong>Mesa:</strong> <span id="ticket-mesa">A1</span></div>
+              <div><strong>Items:</strong> <span id="ticket-count">0</span></div>
+            </div>
+            <div id="ticket-empty" class="ticket-empty">No hay productos agregados.</div>
+            <div id="ticket-items" class="ticket-items"></div>
+          </div>
+          <div class="card-footer ticket-footer d-flex justify-content-between align-items-center">
+            <span>Total</span>
+            <strong id="ticket-total">S/ 0.00</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-lg-8">
+        <div class="card category">
+          <div class="card-header category-bar">
+            <button type="button" class="btn category-tab active" data-target="bebidas">Bebidas</button>
+            <button type="button" class="btn category-tab" data-target="entradas">Piqueos y Entradas</button>
+            <button type="button" class="btn category-tab" data-target="fondos">Platos de Fondo</button>
+          </div>
+
+          <div class="card-body category-body">
+            <div class="category-panel active" data-category="bebidas">
+              <div class="product-grid">
+                <button type="button" class="btn product-btn" data-name="Gaseosa" data-price="8">Gaseosa <span>S/ 8.00</span></button>
+                <button type="button" class="btn product-btn" data-name="Limonada frozen" data-price="12">Limonada frozen <span>S/ 12.00</span></button>
+                <button type="button" class="btn product-btn" data-name="Chicha morada" data-price="8">Chicha morada <span>S/ 8.00</span></button>
+                <button type="button" class="btn product-btn" data-name="Agua mineral" data-price="6">Agua mineral <span>S/ 6.00</span></button>
+              </div>
+            </div>
+
+            <div class="category-panel" data-category="entradas">
+              <div class="product-grid">
+                <button type="button" class="btn product-btn" data-name="Tequeños artesanales" data-price="18">Tequeños artesanales <span>S/ 18.00</span></button>
+                <button type="button" class="btn product-btn" data-name="Alitas BBQ" data-price="24">Alitas BBQ <span>S/ 24.00</span></button>
+                <button type="button" class="btn product-btn" data-name="Ceviche clásico" data-price="29">Ceviche clásico <span>S/ 29.00</span></button>
+              </div>
+            </div>
+
+            <div class="category-panel" data-category="fondos">
+              <div class="product-grid">
+                <button type="button" class="btn product-btn" data-name="Lomo saltado" data-price="32">Lomo saltado <span>S/ 32.00</span></button>
+                <button type="button" class="btn product-btn" data-name="Pollo a la plancha" data-price="26">Pollo a la plancha <span>S/ 26.00</span></button>
+                <button type="button" class="btn product-btn" data-name="Pasta Alfredo" data-price="28">Pasta Alfredo <span>S/ 28.00</span></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-FKyoEForCGlyvwx9Hj09Cyn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+    crossorigin="anonymous"></script>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const mesa = params.get('mesa') || 'A1';
+    const mesaTitle = `MESA ${mesa}`;
+    document.getElementById('mesa-title').textContent = mesaTitle;
+    document.getElementById('ticket-mesa').textContent = mesa;
+
+    const ticketItems = document.getElementById('ticket-items');
+    const ticketEmpty = document.getElementById('ticket-empty');
+    const ticketCount = document.getElementById('ticket-count');
+    const ticketTotal = document.getElementById('ticket-total');
+    const clearTicket = document.getElementById('clear-ticket');
+    const productButtons = document.querySelectorAll('.product-btn');
+    const categoryTabs = document.querySelectorAll('.category-tab');
+    const categoryPanels = document.querySelectorAll('.category-panel');
+
+    const ticketState = [];
+
+    function formatCurrency(value) {
+      return `S/ ${value.toFixed(2)}`;
+    }
+
+    function renderTicket() {
+      ticketItems.innerHTML = '';
+
+      if (ticketState.length === 0) {
+        ticketEmpty.style.display = 'block';
+        ticketCount.textContent = '0';
+        ticketTotal.textContent = 'S/ 0.00';
+        return;
+      }
+
+      ticketEmpty.style.display = 'none';
+      let total = 0;
+      let count = 0;
+
+      ticketState.forEach((item) => {
+        total += item.price * item.quantity;
+        count += item.quantity;
+
+        const row = document.createElement('div');
+        row.className = 'ticket-item';
+        row.innerHTML = `
+          <div>
+            <div class="ticket-item-name">${item.name}</div>
+            <div class="ticket-item-meta">${formatCurrency(item.price)} x ${item.quantity}</div>
+          </div>
+          <strong>${formatCurrency(item.price * item.quantity)}</strong>
+        `;
+        ticketItems.appendChild(row);
+      });
+
+      ticketCount.textContent = String(count);
+      ticketTotal.textContent = formatCurrency(total);
+    }
+
+    productButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const name = button.dataset.name;
+        const price = Number(button.dataset.price || '0');
+        const existingItem = ticketState.find((item) => item.name === name);
+
+        if (existingItem) {
+          existingItem.quantity += 1;
+        } else {
+          ticketState.push({ name, price, quantity: 1 });
+        }
+
+        renderTicket();
+      });
+    });
+
+    categoryTabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const target = tab.dataset.target;
+
+        categoryTabs.forEach((item) => item.classList.remove('active'));
+        categoryPanels.forEach((panel) => panel.classList.remove('active'));
+
+        tab.classList.add('active');
+        document.querySelector(`.category-panel[data-category="${target}"]`)?.classList.add('active');
+      });
+    });
+
+    clearTicket.addEventListener('click', () => {
+      ticketState.length = 0;
+      renderTicket();
+    });
+
+    renderTicket();
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link rel="stylesheet" href="../CSS/styledash.css">
+</head>
+
+<body>
+  <div class="container my-4">
+    <h2 class="mb-3">Gestión de Mesas</h2>
+    <div class="mb-2">
+      <span class="badge bg-light text-dark">Disponible</span>
+      <span class="badge bg-warning text-dark">Ocupada</span>
+      <span class="badge bg-secondary">Reservada</span>
+      <span class="badge bg-danger">Fuera de Servicio</span>
+    </div>
+
+    <h4 class="mt-4">INTERIOR</h4>
+    <div class="row g-3">
+      <div class="col-md-3">
+        <div class="card mesa disponible">
+          <div class="card-body">
+            <a href="MesaDetalle.html?mesa=A1" class="btn mesa-link">MESA A1</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card mesa ocupada">
+          <div class="card-body">
+            <a href="MesaDetalle.html?mesa=A2" class="btn mesa-link">MESA A2</a>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h4 class="mt-4">EXTERIOR</h4>
+    <div class="row g-3">
+      <div class="col-md-3">
+        <div class="card mesa reservada">
+          <div class="card-body">
+            <a href="MesaDetalle.html?mesa=C1" class="btn mesa-link">MESA C1</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+    crossorigin="anonymous"></script>
+</body>
+
+</html>
