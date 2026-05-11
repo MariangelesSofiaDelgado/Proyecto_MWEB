@@ -267,6 +267,41 @@ body {
     border-top: 1px solid rgba(6, 41, 58, 0.1);
 }
 
+.mesas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 0.9rem;
+}
+
+.mesa-btn {
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-weight: 600;
+    padding: 0.9rem 0.6rem;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.mesa-btn.mesa-libre {
+    background: #198754;
+}
+
+.mesa-btn.mesa-ocupada {
+    background: #dc3545;
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+.mesa-btn.mesa-seleccionada {
+    background: #ffc107;
+    color: #2c2c2c;
+    transform: translateY(-2px);
+}
+
+.mesa-btn:not(.mesa-ocupada):hover {
+    transform: translateY(-2px);
+}
+
 .menu-item {
     display: flex;
     align-items: center;

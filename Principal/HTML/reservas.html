@@ -93,13 +93,56 @@
             <h1 class="display-4">Reserva tu mesa</h1>
             <p class="lead">¡Asegura tu lugar en Yaku Sabor! Reserva tu mesa con anticipación para disfrutar de una
                 experiencia culinaria inolvidable.</p>
-            <a href="#" class="btn btn-primary btn-lg">Reservar Ahora</a>
+            <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal"
+                data-bs-target="#reservaMesasModal">
+                Reservar Ahora
+            </button>
         </div>
+
+        <div class="modal fade" id="reservaMesasModal" tabindex="-1" aria-labelledby="reservaMesasModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content menu-modal">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="reservaMesasModalLabel">Selecciona tu mesa</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="reservaFeedback" class="alert alert-info py-2 d-none mb-3" role="alert"></div>
+                        <div class="d-flex justify-content-center gap-3 flex-wrap mb-3">
+                            <span class="badge rounded-pill text-bg-success">Libre</span>
+                            <span class="badge rounded-pill text-bg-danger">Ocupada</span>
+                            <span class="badge rounded-pill text-bg-warning text-dark">Seleccionada</span>
+                        </div>
+                        <div id="mesasGrid" class="mesas-grid" aria-live="polite"></div>
+                        <p id="mesaSeleccionadaTexto" class="text-center mt-3 mb-0 fw-semibold text-body-secondary">
+                            Ninguna mesa seleccionada.
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary" id="confirmarReservaBtn" disabled>
+                            Confirmar reserva
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="bg-dark text-light py-4 mt-auto">
+            <div class="container text-center">
+                <p class="mb-1 fw-semibold">Yaku Sabor</p>
+                <p class="mb-1">Lima, Perú · +51 987 654 321 · contacto@yakusabor.com</p>
+                <small class="text-secondary">© 2026 Yaku Sabor. Todos los derechos reservados.</small>
+            </div>
+        </footer>
+
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
             crossorigin="anonymous"></script>
     </div>
     <script src="../../JS/nav.js"></script>
+    <script src="../../JS/reservas.js"></script>
 </body>
 
 </html>
