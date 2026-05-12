@@ -1,3 +1,4 @@
+// agregar conexion con la API de productos aqui: reemplazar este menu local por datos reales del backend
 const menuData = {
     piqueos: {
         title: "Piqueos & Entradas",
@@ -136,6 +137,7 @@ categoryButtons.forEach((button) => {
 });
 
 const buildOrderPayload = () => ({
+    // agregar conexion con backend aqui: incluir datos reales como mesa_id, cliente_id o notas del pedido
     items: Array.from(cart.values()).map((item) => ({
         id: item.id,
         name: item.name,
@@ -155,6 +157,7 @@ const submitOrder = async () => {
     try {
         // agregar conexion con backend aqui: enviar pedido a Spring Boot
         // await fetch("/api/pedidos", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+        // agregar conexion con backend aqui: manejar respuesta (id de pedido, estado y tiempo estimado)
         console.log("Pedido listo para enviar:", payload);
         alert("Pedido listo para enviar. (Pendiente integración backend)");
     } catch (error) {

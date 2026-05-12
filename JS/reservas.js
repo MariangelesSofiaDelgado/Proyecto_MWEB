@@ -1,6 +1,7 @@
 const TOTAL_MESAS = 12;
 
 const API_CONFIG = {
+    // agregar conexion con backend aqui: configurar URL real del servicio de reservas en producción
     baseUrl: window.RESERVAS_API_BASE_URL || "http://localhost:3000/api",
     estadoMesasPath: "/mesas/estado",
     reservarPath: "/reservas"
@@ -16,6 +17,7 @@ let mesasEstado = [];
 let mesaSeleccionada = null;
 
 const getMockMesasEstado = () =>
+    // agregar conexion con backend aqui: este estado es temporal mientras no responda la API de mesas
     Array.from({ length: TOTAL_MESAS }, (_, index) => ({
         id: index + 1,
         libre: Math.random() > 0.35
@@ -48,6 +50,7 @@ const normalizeMesasEstado = (payload) => {
 };
 
 const fetchMesasEstado = async () => {
+    // agregar conexion con la API de mesas aqui: consumir disponibilidad en tiempo real
     const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.estadoMesasPath}`);
     if (!response.ok) {
         throw new Error("No se pudo obtener el estado de las mesas.");
@@ -57,6 +60,7 @@ const fetchMesasEstado = async () => {
 };
 
 const enviarReserva = async (mesaId) => {
+    // agregar conexion con la API de reservas aqui: registrar cliente, fecha y turno seleccionado
     const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.reservarPath}`, {
         method: "POST",
         headers: {

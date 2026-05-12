@@ -107,20 +107,22 @@
                         <h5 class="modal-title" id="reservaMesasModalLabel">Selecciona tu mesa</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                     </div>
-                    <div class="modal-body">
-                        <div id="reservaFeedback" class="alert alert-info py-2 d-none mb-3" role="alert"></div>
-                        <div class="d-flex justify-content-center gap-3 flex-wrap mb-3">
+                        <div class="modal-body">
+                            <div id="reservaFeedback" class="alert alert-info py-2 d-none mb-3" role="alert"></div>
+                            <div class="d-flex justify-content-center gap-3 flex-wrap mb-3">
                             <span class="badge rounded-pill text-bg-success">Libre</span>
                             <span class="badge rounded-pill text-bg-danger">Ocupada</span>
                             <span class="badge rounded-pill text-bg-warning text-dark">Seleccionada</span>
+                            </div>
+                            <!-- agregar conexion con backend aqui: mostrar disponibilidad real de mesas desde la API -->
+                            <div id="mesasGrid" class="mesas-grid" aria-live="polite"></div>
+                            <p id="mesaSeleccionadaTexto" class="text-center mt-3 mb-0 fw-semibold text-body-secondary">
+                                Ninguna mesa seleccionada.
+                            </p>
                         </div>
-                        <div id="mesasGrid" class="mesas-grid" aria-live="polite"></div>
-                        <p id="mesaSeleccionadaTexto" class="text-center mt-3 mb-0 fw-semibold text-body-secondary">
-                            Ninguna mesa seleccionada.
-                        </p>
-                    </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <!-- agregar conexion con backend aqui: confirmar reserva con datos del cliente -->
                         <button type="button" class="btn btn-primary" id="confirmarReservaBtn" disabled>
                             Confirmar reserva
                         </button>
