@@ -1,5 +1,4 @@
 // Navbar: cambia estilos y logos al hacer scroll.
-// agregar conexion con backend aqui: cargar datos de sesión (usuario/logueado) para actualizar acciones del navbar
 const navbar = document.getElementById('mainNavbar');
 const navLogo = document.getElementById('navLogo');
 const registerImage = document.querySelector('.nav-register-image');
