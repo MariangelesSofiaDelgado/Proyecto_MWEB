@@ -46,6 +46,9 @@ const menuData = {
     }
 };
 
+// agregar conexion con backend aqui: cargar menu dinamico desde la base de datos
+// const menuData = await fetch("/api/productos").then((response) => response.json());
+
 const cart = new Map();
 const formatter = new Intl.NumberFormat("es-PE", {
     style: "currency",
@@ -59,6 +62,7 @@ const cartItemsContainer = document.getElementById("cartItems");
 const cartTotalElement = document.getElementById("cartTotal");
 const menuModalLabel = document.getElementById("menuModalLabel");
 const menuModalDescription = document.getElementById("menuModalDescription");
+const submitOrderButton = document.getElementById("submitOrderButton");
 
 const menuModal = menuModalElement ? new bootstrap.Modal(menuModalElement) : null;
 
@@ -130,5 +134,37 @@ categoryButtons.forEach((button) => {
         renderMenuItems(categoryKey);
     });
 });
+
+const buildOrderPayload = () => ({
+    items: Array.from(cart.values()).map((item) => ({
+        id: item.id,
+        name: item.name,
+        price: item.price
+    })),
+    total: Array.from(cart.values()).reduce((sum, item) => sum + item.price, 0)
+});
+
+const submitOrder = async () => {
+    if (cart.size === 0) {
+        alert("Agrega al menos un plato antes de enviar el pedido.");
+        return;
+    }
+
+    const payload = buildOrderPayload();
+
+    try {
+        // agregar conexion con backend aqui: enviar pedido a Spring Boot
+        // await fetch("/api/pedidos", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+        console.log("Pedido listo para enviar:", payload);
+        alert("Pedido listo para enviar. (Pendiente integración backend)");
+    } catch (error) {
+        console.error("Error al enviar pedido", error);
+        alert("No se pudo enviar el pedido. Intenta nuevamente.");
+    }
+};
+
+if (submitOrderButton) {
+    submitOrderButton.addEventListener("click", submitOrder);
+}
 
 updateCartUI();
