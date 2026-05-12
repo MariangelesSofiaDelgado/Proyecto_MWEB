@@ -1,4 +1,40 @@
 document.addEventListener("DOMContentLoaded", () => {
+    const switchModal = (fromModalId, toModalId) => {
+        if (typeof bootstrap === "undefined") return;
+
+        const fromModalElement = document.getElementById(fromModalId);
+        const toModalElement = document.getElementById(toModalId);
+
+        if (!fromModalElement || !toModalElement) return;
+
+        const fromModal = bootstrap.Modal.getOrCreateInstance(fromModalElement);
+        const toModal = bootstrap.Modal.getOrCreateInstance(toModalElement);
+
+        const handleHidden = () => {
+            fromModalElement.removeEventListener("hidden.bs.modal", handleHidden);
+            toModal.show();
+        };
+
+        fromModalElement.addEventListener("hidden.bs.modal", handleHidden);
+        fromModal.hide();
+    };
+
+    const linkToRegister = document.getElementById("linkToRegister");
+    if (linkToRegister) {
+        linkToRegister.addEventListener("click", (event) => {
+            event.preventDefault();
+            switchModal("registroModal", "crearCuentaModal");
+        });
+    }
+
+    const linkToLogin = document.getElementById("linkToLogin");
+    if (linkToLogin) {
+        linkToLogin.addEventListener("click", (event) => {
+            event.preventDefault();
+            switchModal("crearCuentaModal", "registroModal");
+        });
+    }
+
     // 1. Capturamos el formulario por su ID
     const loginForm = document.getElementById("loginForm");
 
@@ -99,25 +135,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     // Limpiar formulario
                     registerForm.reset();
 
-                    // 1. Ocultar modal de registro
-                    const modalRegistroElement =
-                        document.getElementById("crearCuentaModal");
-                    const modalRegistro =
-                        bootstrap.Modal.getInstance(modalRegistroElement);
-                    if (modalRegistro) modalRegistro.hide();
-
-                    // SOLUCIÓN AL BUG: Eliminar manualmente el fondo oscuro y el bloqueo del body
-                    document.body.classList.remove("modal-open");
-                    document.body.style.overflow = "";
-                    document.body.style.paddingRight = "";
-                    const backdrops = document.querySelectorAll(".modal-backdrop");
-                    backdrops.forEach((backdrop) => backdrop.remove());
-
-                    // 2. Mostrar modal de Login
-                    const modalLogin = new bootstrap.Modal(
-                        document.getElementById("registroModal"),
-                    );
-                    modalLogin.show();
+                    switchModal("crearCuentaModal", "registroModal");
                 } else {
                     // Posibles errores: el correo ya existe, etc.
                     const errorData = await response.text();
