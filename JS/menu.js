@@ -1,51 +1,6 @@
-// agregar conexion con la API de productos aqui: reemplazar este menu local por datos reales del backend
-const menuData = {
-    piqueos: {
-        title: "Piqueos & Entradas",
-        description: "Ideales para compartir mientras disfrutas del sabor marino.",
-        items: [
-            { id: "piqueo-ceviche", name: "Ceviche clásico", description: "Pescado del día, leche de tigre cítrica y cancha crocante.", price: 28 },
-            { id: "piqueo-choros", name: "Choros a la chalaca", description: "Mejillones frescos con cebolla, tomate y limón.", price: 22 },
-            { id: "piqueo-tiradito", name: "Tiradito de ají amarillo", description: "Láminas de pescado con crema suave de ají amarillo.", price: 30 }
-        ]
-    },
-    sandwiches: {
-        title: "Sándwiches",
-        description: "Opciones marinas con panes artesanales y salsas frescas.",
-        items: [
-            { id: "sandwich-pejerrey", name: "Pan con pejerrey", description: "Pejerrey crocante, salsa tártara y limón.", price: 20 },
-            { id: "sandwich-pescado", name: "Pan con pescado", description: "Filete dorado con criolla y mayo cítrica.", price: 24 },
-            { id: "sandwich-calamares", name: "Pan con calamares", description: "Calamares rebozados con alioli de limón.", price: 26 }
-        ]
-    },
-    fondos: {
-        title: "Platos de fondo",
-        description: "Platos principales con el toque de la casa.",
-        items: [
-            { id: "fondo-arroz-mariscos", name: "Arroz con mariscos", description: "Arroz meloso con mix de mariscos y sofrito peruano.", price: 38 },
-            { id: "fondo-parihuela", name: "Parihuela", description: "Sopa concentrada de mariscos con ají y hierbas.", price: 36 },
-            { id: "fondo-chaufa", name: "Chaufa de mariscos", description: "Salteado al wok con arroz, mariscos y salsa oriental.", price: 34 }
-        ]
-    },
-    postres: {
-        title: "Postres",
-        description: "Dulces ligeros para cerrar tu experiencia.",
-        items: [
-            { id: "postre-suspiro", name: "Suspiro limeño", description: "Crema de leche y merengue con canela.", price: 16 },
-            { id: "postre-pie-limon", name: "Pie de limón", description: "Base crocante con crema cítrica y merengue.", price: 15 },
-            { id: "postre-cheesecake", name: "Cheesecake de maracuyá", description: "Cheesecake suave con salsa de maracuyá.", price: 17 }
-        ]
-    },
-    bebidas: {
-        title: "Bebidas",
-        description: "Refrescantes y perfectas para acompañar tu pedido.",
-        items: [
-            { id: "bebida-chicha", name: "Chicha morada", description: "Bebida tradicional con frutas y especias.", price: 10 },
-            { id: "bebida-limonada", name: "Limonada hierbabuena", description: "Limonada fresca con toque de hierbabuena.", price: 11 },
-            { id: "bebida-maracuya", name: "Jugo de maracuyá", description: "Jugo natural de maracuyá.", price: 12 }
-        ]
-    }
-};
+// agregar conexion con la API de productos aqui: cargar el menu real desde Spring Boot
+// cuando no haya backend, el menu queda vacio
+const menuData = {};
 
 // agregar conexion con backend aqui: cargar menu dinamico desde la base de datos
 // const menuData = await fetch("/api/productos").then((response) => response.json());
