@@ -68,14 +68,16 @@ document.addEventListener("DOMContentLoaded", () => {
                     localStorage.setItem("nombre", data.nombre);
 
                     alert(`¡Bienvenido/a, ${data.nombre}!`);
+                    const rolAsignado = data.rol ? data.rol.trim().toLowerCase() : "";
+                    console.log("Rol recibido desde el backend:", rolAsignado); // <-- Para ver qué llega exactamente
 
                     // 6. Redirección basada en el Rol (RBAC)
-                    if (data.rol === "cliente") {
+                    if (rolAsignado === "cliente" || rolAsignado.includes("cliente")) {
                         // Si es cliente, se queda en la vista pública (o se recarga para actualizar el menú)
-                        window.location.href = "/Principal/index.html";
+                        window.location.href = "../../Principal/HTML/index.html";
                     } else {
                         // Si es admin, mesero, cocina o caja, va al Dashboard
-                        window.location.href = "/Dashboard/index.html";
+                        window.location.href = "../../Dashboard/HTML/OtrasHerramientas.html";
                     }
                 } else {
                     // Si el backend responde con error (ej. 401 Unauthorized)
