@@ -54,6 +54,7 @@
           </div>
 
           <div class="card-body category-body">
+            <!-- agregar conexion con la API de productos aqui: reemplazar botones estáticos por menú real -->
             <div class="category-panel active" data-category="bebidas">
               <div class="product-grid">
                 <button type="button" class="btn product-btn" data-name="Gaseosa" data-price="8">Gaseosa <span>S/ 8.00</span></button>
@@ -104,12 +105,14 @@
     const categoryPanels = document.querySelectorAll('.category-panel');
 
     const ticketState = [];
+    // agregar conexion con backend aqui: inicializar ticket con pedido activo de la mesa seleccionada
 
     function formatCurrency(value) {
       return `S/ ${value.toFixed(2)}`;
     }
 
     function renderTicket() {
+      // agregar conexion con backend aqui: refrescar ticket con cambios confirmados por el servidor
       ticketItems.innerHTML = '';
 
       if (ticketState.length === 0) {
@@ -172,6 +175,7 @@
     });
 
     clearTicket.addEventListener('click', () => {
+      // agregar conexion con backend aqui: limpiar/cancelar pedido en el backend
       ticketState.length = 0;
       renderTicket();
     });

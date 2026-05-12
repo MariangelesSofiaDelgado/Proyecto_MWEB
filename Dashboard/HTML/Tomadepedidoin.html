@@ -29,6 +29,7 @@
                 <th>Envio del pedido</th>
             </tr>
         </thead>
+        <!-- agregar conexion con la API de pedidos aqui: mostrar estado real de cada pedido -->
         <tbody class="table-secondary">
             <tr>
                 <td>-->Estado</td>
@@ -66,6 +67,7 @@
                 </td>
                 <td>
                     <label>Dar estado</label>
+                    <!-- agregar conexion con backend aqui: enviar cambio de estado del pedido -->
                     <select>
                         <option>Pendiente</option>
                         <option>En peparacion</option>
@@ -79,6 +81,7 @@
         <tfoot>
             <tr>
                 <td>
+                    <!-- agregar conexion con backend aqui: acciones de rechazar/borrar/enviar deben llamar a la API -->
                     <button>Rechasar pedido</button>
                 </td>
                 <td>
