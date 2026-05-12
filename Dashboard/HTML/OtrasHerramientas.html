@@ -17,7 +17,7 @@
         <div class="container-fluid">
             <div class="ms-auto d-flex align-items-center">
                 <a href="#" class="profile-link d-flex align-items-center text-decoration-none">
-                    <img src="../img/profile-placeholder.png" alt="perfil" class="profile-img">
+                    <img src="../../img/ICON1.png" alt="perfil" class="profile-img">
                 </a>
             </div>
         </div>
@@ -32,14 +32,10 @@
                     </div>
                     <div class="left-options mt-3 d-grid gap-2">
                         <a href="Gestion DeSala.html" class="btn-pdf js-dashboard-link" data-title="Gestión de Sala">Gestión de Sala</a>
-                        <a href="GestionDeCocina.html" class="btn-pdf js-dashboard-link" data-title="Gestión Cocina In">Gestión Cocina In</a>
-                        <a href="GestionDeCocinav2.html" class="btn-pdf js-dashboard-link" data-title="Gestión Cocina Out">Gestión Cocina Out</a>
+                        <a href="GestionDeCocinav2.html" class="btn-pdf js-dashboard-link" data-title="Gestión Cocina">Gestión Cocina</a>
                         <a href="Tomadepedidoin.html" class="btn-pdf js-dashboard-link" data-title="Toma de Pedido In">Toma de Pedido In</a>
                         <a href="Tomadepedidoout.html" class="btn-pdf js-dashboard-link" data-title="Toma de Pedido Out">Toma de Pedido Out</a>
                         <a href="Factura.html" class="btn-pdf js-dashboard-link" data-title="Factura">Factura</a>
-                        <a href="#" class="btn-pdf js-dashboard-link" data-title="Interruptor de Disponibilidad">Interruptor de Disponibilidad</a>
-                        <a href="#" class="btn-pdf js-dashboard-link" data-title="Ocultar Platos No Disponibles">Ocultar Platos No Disponibles</a>
-                        <a href="#" class="btn-pdf js-dashboard-link" data-title="Gestión de Insumos">Gestión de Insumos</a>
                     </div>
                 </div>
             </aside>
@@ -84,7 +80,7 @@
                     event.preventDefault();
                     viewerTitle.textContent = `${title} (pendiente)`;
                     moduleFrame.removeAttribute('src');
-                    moduleFrame.srcdoc = '<div style="font-family: Arial, sans-serif; padding: 24px; color: #1b3a57;"><h4>Módulo pendiente</h4><p>Este botón aún no tiene una vista conectada.</p></div>';
+                    moduleFrame.srcdoc = '<div style="font-family: Arial, sans-serif; padding: 24px; color: #1b3a57;"><h4>Módulo pendiente</h4><p>Este botón aún no tiene una vista conectada.</p>';
                     return;
                 }
 
