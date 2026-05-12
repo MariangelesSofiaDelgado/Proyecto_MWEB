@@ -1,24 +1,24 @@
 document.addEventListener("DOMContentLoaded", () => {
     // 1. Capturamos el formulario por su ID
-    const loginForm = document.getElementById('loginForm');
+    const loginForm = document.getElementById("loginForm");
 
     if (loginForm) {
-        loginForm.addEventListener('submit', async (e) => {
+        loginForm.addEventListener("submit", async (e) => {
             e.preventDefault(); // Evita que la página se recargue al enviar el formulario
 
             // 2. Capturamos los valores usando los IDs que ya tienes en tu HTML
-            const email = document.getElementById('exampleInputEmail1').value;
-            const password = document.getElementById('exampleInputPassword1').value;
+            const email = document.getElementById("exampleInputEmail1").value;
+            const password = document.getElementById("exampleInputPassword1").value;
 
             try {
                 // 3. Hacemos la petición POST al futuro backend de Spring Boot
                 // Nota: Asumimos que Spring Boot correrá en localhost:8080
-                const response = await fetch('http://localhost:8080/api/auth/login', {
-                    method: 'POST',
+                const response = await fetch("http://localhost:8080/api/auth/login", {
+                    method: "POST",
                     headers: {
-                        'Content-Type': 'application/json'
+                        "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({ email: email, password: password })
+                    body: JSON.stringify({ email: email, password: password }),
                 });
 
                 // 4. Verificamos si la respuesta es exitosa (código 200 OK)
@@ -27,43 +27,47 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     // 5. Guardamos el Token y el Rol en el LocalStorage
                     // (Asumimos que el backend nos devolverá un token y el rol del usuario)
-                    localStorage.setItem('token', data.token);
-                    localStorage.setItem('rol', data.rol);
-                    localStorage.setItem('nombre', data.nombre);
+                    localStorage.setItem("token", data.token);
+                    localStorage.setItem("rol", data.rol);
+                    localStorage.setItem("nombre", data.nombre);
 
                     alert(`¡Bienvenido/a, ${data.nombre}!`);
 
                     // 6. Redirección basada en el Rol (RBAC)
-                    if (data.rol === 'cliente') {
+                    if (data.rol === "cliente") {
                         // Si es cliente, se queda en la vista pública (o se recarga para actualizar el menú)
-                        window.location.href = '/Principal/index.html'; 
+                        window.location.href = "/Principal/index.html";
                     } else {
                         // Si es admin, mesero, cocina o caja, va al Dashboard
-                        window.location.href = '/Dashboard/index.html'; 
+                        window.location.href = "/Dashboard/index.html";
                     }
-
                 } else {
                     // Si el backend responde con error (ej. 401 Unauthorized)
-                    alert('Correo o contraseña incorrectos. Por favor, intenta de nuevo.');
+                    alert(
+                        "Correo o contraseña incorrectos. Por favor, intenta de nuevo.",
+                    );
                 }
             } catch (error) {
                 // Si el servidor de Spring Boot está apagado o hay un error de red
-                console.error('Error de conexión:', error);
-                alert('No se pudo conectar con el servidor. Verifica que el backend esté encendido.');
+                console.error("Error de conexión:", error);
+                alert(
+                    "No se pudo conectar con el servidor. Verifica que el backend esté encendido.",
+                );
             }
         });
     }
 
-    const registerForm = document.getElementById('registerForm');
+    const registerForm = document.getElementById("registerForm");
 
     if (registerForm) {
-        registerForm.addEventListener('submit', async (e) => {
+        registerForm.addEventListener("submit", async (e) => {
             e.preventDefault();
 
-            const nombre = document.getElementById('regNombre').value;
-            const email = document.getElementById('regEmail').value;
-            const password = document.getElementById('regPassword').value;
-            const confirmPassword = document.getElementById('regConfirmPassword').value;
+            const nombre = document.getElementById("regNombre").value;
+            const email = document.getElementById("regEmail").value;
+            const password = document.getElementById("regPassword").value;
+            const confirmPassword =
+                document.getElementById("regConfirmPassword").value;
 
             // 1. Validar que las contraseñas sean iguales
             if (password !== confirmPassword) {
@@ -73,36 +77,55 @@ document.addEventListener("DOMContentLoaded", () => {
 
             try {
                 // 2. Enviar datos al futuro backend en Spring Boot
-                const response = await fetch('http://localhost:8080/api/auth/registro', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
+                const response = await fetch(
+                    "http://localhost:8080/api/auth/registro",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        // El backend le asignará el rol 'cliente' por defecto a este nuevo usuario
+                        body: JSON.stringify({
+                            nombre: nombre,
+                            email: email,
+                            password: password,
+                        }),
                     },
-                    // El backend le asignará el rol 'cliente' por defecto a este nuevo usuario
-                    body: JSON.stringify({ nombre: nombre, email: email, password: password })
-                });
+                );
 
                 if (response.ok) {
                     alert("¡Cuenta creada con éxito! Ahora puedes iniciar sesión.");
-                    
-                    // 3. Limpiar formulario
+
+                    // Limpiar formulario
                     registerForm.reset();
 
-                    // 4. Cambiar al modal de Login usando la API de Bootstrap
-                    const modalRegistro = bootstrap.Modal.getInstance(document.getElementById('crearCuentaModal'));
-                    modalRegistro.hide();
-                    
-                    const modalLogin = new bootstrap.Modal(document.getElementById('registroModal'));
-                    modalLogin.show();
+                    // 1. Ocultar modal de registro
+                    const modalRegistroElement =
+                        document.getElementById("crearCuentaModal");
+                    const modalRegistro =
+                        bootstrap.Modal.getInstance(modalRegistroElement);
+                    if (modalRegistro) modalRegistro.hide();
 
+                    // SOLUCIÓN AL BUG: Eliminar manualmente el fondo oscuro y el bloqueo del body
+                    document.body.classList.remove("modal-open");
+                    document.body.style.overflow = "";
+                    document.body.style.paddingRight = "";
+                    const backdrops = document.querySelectorAll(".modal-backdrop");
+                    backdrops.forEach((backdrop) => backdrop.remove());
+
+                    // 2. Mostrar modal de Login
+                    const modalLogin = new bootstrap.Modal(
+                        document.getElementById("registroModal"),
+                    );
+                    modalLogin.show();
                 } else {
                     // Posibles errores: el correo ya existe, etc.
                     const errorData = await response.text();
                     alert(`Error al registrarse: ${errorData}`);
                 }
             } catch (error) {
-                console.error('Error de conexión:', error);
-                alert('No se pudo conectar con el servidor para el registro.');
+                console.error("Error de conexión:", error);
+                alert("No se pudo conectar con el servidor para el registro.");
             }
         });
     }
