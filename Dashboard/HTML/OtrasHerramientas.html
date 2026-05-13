@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Dashboard - Yaku Sabor</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="../CSS/styledash.css?v=2">
@@ -15,7 +15,14 @@
 <body>
     <nav class="navbar navbar-expand bg-white shadow-sm py-2">
         <div class="container-fluid">
-            <div class="ms-auto d-flex align-items-center">
+            <div class="ms-auto d-flex align-items-center gap-3">
+                <div class="text-end">
+                    <div class="fw-semibold text-primary" id="dashboardUserName">Usuario</div>
+                    <small class="text-muted" id="dashboardUserRole">Rol</small>
+                </div>
+                <button class="btn btn-outline-danger btn-sm" type="button" id="dashboardLogoutBtn">
+                    Cerrar sesión
+                </button>
                 <a href="#" class="profile-link d-flex align-items-center text-decoration-none">
                     <img src="../../img/ICON1.png" alt="perfil" class="profile-img">
                 </a>
@@ -72,6 +79,27 @@
         const moduleLinks = document.querySelectorAll('.js-dashboard-link');
         const moduleFrame = document.getElementById('dashboard-content-frame');
         const viewerTitle = document.getElementById('viewer-title');
+        const dashboardUserName = document.getElementById('dashboardUserName');
+        const dashboardUserRole = document.getElementById('dashboardUserRole');
+        const dashboardLogoutBtn = document.getElementById('dashboardLogoutBtn');
+
+        const token = localStorage.getItem('token');
+        const nombre = localStorage.getItem('nombre');
+        const rol = localStorage.getItem('rol');
+
+        if (!token) {
+            window.location.href = '../../Principal/HTML/index.html';
+        }
+
+        dashboardUserName.textContent = nombre || 'Usuario';
+        dashboardUserRole.textContent = rol || 'Sin rol';
+
+        dashboardLogoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('rol');
+            localStorage.removeItem('nombre');
+            window.location.href = '../../Principal/HTML/index.html';
+        });
 
         moduleLinks.forEach((link) => {
             link.addEventListener('click', (event) => {

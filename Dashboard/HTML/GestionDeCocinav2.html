@@ -8,27 +8,84 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-<link rel="stylesheet" href="../CSS/styledash.css">
+    <link rel="stylesheet" href="../CSS/styledash.css">
+    <style>
+        body {
+            background: transparent;
+        }
+
+        .kitchen-dashboard {
+            padding: 16px;
+        }
+
+        .kitchen-section {
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid #dbe3ea;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 18px;
+            overflow: hidden;
+        }
+
+        .kitchen-section-title {
+            color: #1b3a57;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .kitchen-table-wrap {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .kitchen-table {
+            margin-bottom: 0;
+            min-width: 920px;
+            vertical-align: middle;
+        }
+
+        .kitchen-table th,
+        .kitchen-table td {
+            white-space: normal;
+            overflow-wrap: anywhere;
+        }
+
+        .kitchen-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            min-width: 220px;
+        }
+
+        .kitchen-actions .btn {
+            flex: 1 1 auto;
+            min-width: 68px;
+        }
+
+        .spec-table {
+            min-width: 760px;
+        }
+    </style>
 </head>
 
 <body>
 
-    <main class="container-fluid">
-        <div class="row">
-            <div class="col-6">
-                <table class="table table-striped table-hover table-dark">
-                    <caption>Tabla de pedidos +</caption>
+    <main class="container-fluid kitchen-dashboard">
+        <section class="kitchen-section">
+            <h2 class="kitchen-section-title">Pedidos activos</h2>
+            <div class="kitchen-table-wrap">
+                <table class="table table-striped table-hover table-dark kitchen-table">
+                    <caption>Tabla de pedidos</caption>
                     <thead>
                         <tr>
                             <th>Nombre del plato</th>
                             <th>ID del plato</th>
-                            <th>Mesa a la que pertenese</th>
+                            <th>Mesa o destino</th>
                             <th>Cantidad</th>
                             <th>Estado</th>
                             <th>Acción</th>
                         </tr>
-
-
                     </thead>
                     <tbody id="pedidosCocinaBody">
                         <tr>
@@ -39,24 +96,25 @@
                         <tr>
                             <th colspan="3">Total: </th>
                             <th id="totalItemsCocina">0</th>
+                            <th colspan="2"></th>
                         </tr>
-
-
                     </tfoot>
                 </table>
             </div>
-            <div class="col-6">
-                <table class="table table-striped table-hover table-danger">
+        </section>
+
+        <section class="kitchen-section">
+            <h2 class="kitchen-section-title">Especificaciones</h2>
+            <div class="kitchen-table-wrap">
+                <table class="table table-striped table-hover table-danger kitchen-table spec-table">
                     <caption>Tabla de especificaciones</caption>
                     <thead>
                         <tr>
-                            <th>Numero de la mesa</th>
+                            <th>Número de mesa</th>
                             <th>ID empleado</th>
-                            <th>Detalles estras</th>
-                            <th>Numero total de pedidos</th>
+                            <th>Detalles extra</th>
+                            <th>Total de pedidos</th>
                         </tr>
-
-
                     </thead>
                     <tbody id="pedidosDetalleBody">
                         <tr>
@@ -67,12 +125,10 @@
                         <tr>
 
                         </tr>
-
-
                     </tfoot>
                 </table>
             </div>
-        </div>
+        </section>
 
     </main>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
@@ -115,7 +171,7 @@
                     <td>${detalle.cantidad}</td>
                     <td>${pedido.estado}</td>
                     <td>
-                        <div class="btn-group btn-group-sm" role="group">
+                        <div class="kitchen-actions">
                             <button class="btn btn-warning" type="button" data-pedido-id="${pedido.id}" data-estado="en_preparacion">Preparar</button>
                             <button class="btn btn-success" type="button" data-pedido-id="${pedido.id}" data-estado="listo">Listo</button>
                             <button class="btn btn-primary" type="button" data-pedido-id="${pedido.id}" data-estado="entregado">Entregado</button>
@@ -143,7 +199,7 @@
                 if (!response.ok) throw new Error("No se pudieron cargar los pedidos.");
                 renderPedidos(await response.json());
             } catch (error) {
-                pedidosCocinaBody.innerHTML = `<tr><td colspan="4">${error.message}</td></tr>`;
+                pedidosCocinaBody.innerHTML = `<tr><td colspan="6">${error.message}</td></tr>`;
                 pedidosDetalleBody.innerHTML = '<tr><td colspan="4">Verifica que el backend esté encendido.</td></tr>';
             }
         };

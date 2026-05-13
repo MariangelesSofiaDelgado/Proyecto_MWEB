@@ -1,4 +1,41 @@
 document.addEventListener("DOMContentLoaded", () => {
+    const publicHomePath = "../../Principal/HTML/index.html";
+
+    const clearSession = () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("rol");
+        localStorage.removeItem("nombre");
+    };
+
+    const setupPublicSessionUI = () => {
+        const navSessionButton = document.querySelector(".nav-register-btn");
+        if (!navSessionButton) return;
+
+        const token = localStorage.getItem("token");
+        const nombre = localStorage.getItem("nombre");
+        const label = navSessionButton.querySelector("span");
+
+        if (!token) {
+            if (label) label.textContent = "Inicia Sesión";
+            navSessionButton.setAttribute("data-bs-toggle", "modal");
+            navSessionButton.setAttribute("data-bs-target", "#registroModal");
+            return;
+        }
+
+        if (label) {
+            label.textContent = nombre ? `${nombre} | Cerrar sesión` : "Cerrar sesión";
+        }
+
+        navSessionButton.removeAttribute("data-bs-toggle");
+        navSessionButton.removeAttribute("data-bs-target");
+        navSessionButton.setAttribute("aria-label", "Cerrar sesión");
+        navSessionButton.addEventListener("click", (event) => {
+            event.preventDefault();
+            clearSession();
+            window.location.href = publicHomePath;
+        });
+    };
+
     const switchModal = (fromModalId, toModalId) => {
         if (typeof bootstrap === "undefined") return;
 
@@ -35,8 +72,8 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 1. Capturamos el formulario por su ID
-    const loginForm = document.getElementById("loginForm");
+    const loginForm = document.getElementById("loginForm")
+        || document.getElementById("exampleInputEmail1")?.closest("form");
 
     if (loginForm) {
         loginForm.addEventListener("submit", async (e) => {
@@ -66,6 +103,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     localStorage.setItem("token", data.token);
                     localStorage.setItem("rol", data.rol);
                     localStorage.setItem("nombre", data.nombre);
+                    setupPublicSessionUI();
 
                     alert(`¡Bienvenido/a, ${data.nombre}!`);
                     const rolAsignado = data.rol ? data.rol.trim().toLowerCase() : "";
@@ -149,4 +187,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
+
+    setupPublicSessionUI();
 });
