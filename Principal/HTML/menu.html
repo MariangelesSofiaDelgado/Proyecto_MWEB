@@ -94,7 +94,6 @@
             <p class="small text-muted mb-0" id="menuStatus"></p>
 
             <div class="row justify-content-center mt-4">
-                <!-- agregar conexion con la API de productos aqui: categorías y platos deben cargarse dinámicamente -->
                 <div class="col-6 col-md-2 mb-4">
                     <button class="categoria-btn" type="button" data-category="piqueos">
                         <div class="categoria-circulo"><span>PIQUEOS & ENTRADAS</span></div>
@@ -140,7 +139,6 @@
                             <li class="text-muted">Aún no agregas platos.</li>
                         </ul>
                         <div class="d-flex justify-content-end">
-                            <!-- agregar conexion con backend aqui: envio de pedido seleccionado -->
                             <button class="btn btn-primary" id="submitOrderButton" type="button">
                                 Enviar pedido
                             </button>
@@ -169,6 +167,49 @@
             </div>
         </div>
 
+        <div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="checkoutModalLabel">Detalles de tu Pedido</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body text-start">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">¿Cómo deseas tu pedido?</label>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="tipoPedido" id="tipoPresencial" value="presencial" checked>
+                                <label class="form-check-label" for="tipoPresencial">Consumo en el Local (Presencial)</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="tipoPedido" id="tipoDelivery" value="delivery">
+                                <label class="form-check-label" for="tipoDelivery">Delivery (Para llevar)</label>
+                            </div>
+                        </div>
+
+                        <div id="seccionPresencial" class="mb-3">
+                            <label for="numeroMesa" class="form-label fw-semibold">Número de Mesa</label>
+                            <select class="form-select" id="numeroMesa">
+                                <option value="" selected disabled>Selecciona la mesa...</option>
+                                <option value="1">Mesa M01 (Interior)</option>
+                                <option value="2">Mesa M02 (Interior)</option>
+                                <option value="3">Mesa M03 (Exterior)</option>
+                                <option value="4">Mesa M04 (Exterior)</option>
+                            </select>
+                        </div>
+
+                        <div id="seccionDelivery" class="mb-3 d-none">
+                            <label for="direccionDelivery" class="form-label fw-semibold">Dirección de entrega</label>
+                            <input type="text" class="form-control" id="direccionDelivery" placeholder="Ej: Av. Los Pescadores 123">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary" id="confirmCheckoutBtn">Confirmar Pedido</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <footer class="bg-dark text-light py-4 mt-auto">
             <div class="container text-center">
                 <p class="mb-1 fw-semibold">Yaku Sabor</p>

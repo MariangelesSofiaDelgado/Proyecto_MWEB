@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Gestión Cocina</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
@@ -23,25 +23,22 @@
                             <th>Nombre del plato</th>
                             <th>ID del plato</th>
                             <th>Mesa a la que pertenese</th>
-                            <th>Numero</th>
+                            <th>Cantidad</th>
+                            <th>Estado</th>
+                            <th>Acción</th>
                         </tr>
 
 
                     </thead>
-                    <!-- agregar conexion con la API de cocina aqui: cargar pedidos pendientes en esta tabla -->
-                    <tbody>
+                    <tbody id="pedidosCocinaBody">
                         <tr>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
+                            <td colspan="6">Cargando pedidos...</td>
                         </tr>
-
                     </tbody>
                     <tfoot>
                         <tr>
                             <th colspan="3">Total: </th>
-                            <th>0</th>
+                            <th id="totalItemsCocina">0</th>
                         </tr>
 
 
@@ -61,15 +58,10 @@
 
 
                     </thead>
-                    <!-- agregar conexion con backend aqui: completar datos de mesa/mesero y observaciones -->
-                    <tbody>
+                    <tbody id="pedidosDetalleBody">
                         <tr>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
+                            <td colspan="4">Cargando especificaciones...</td>
                         </tr>
-
                     </tbody>
                     <tfoot>
                         <tr>
@@ -86,6 +78,112 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
         crossorigin="anonymous"></script>
+    <script>
+        const PEDIDOS_API_URL = "http://localhost:8080/api/pedidos";
+        const pedidosCocinaBody = document.getElementById("pedidosCocinaBody");
+        const pedidosDetalleBody = document.getElementById("pedidosDetalleBody");
+        const totalItemsCocina = document.getElementById("totalItemsCocina");
+        let pedidosEnProceso = false;
+
+        const getDestinoPedido = (pedido) => {
+            if (pedido.tipo === "delivery") {
+                return pedido.direccionDelivery || "Delivery";
+            }
+            return pedido.mesaCodigo || `Mesa ${pedido.mesaId || "-"}`;
+        };
+
+        const renderPedidos = (pedidos) => {
+            const pedidosActivos = pedidos.filter((pedido) =>
+                !["cancelado", "facturado", "entregado"].includes(pedido.estado)
+            );
+            const detalles = pedidosActivos.flatMap((pedido) =>
+                (pedido.detalles || []).map((detalle) => ({ pedido, detalle }))
+            );
+
+            if (detalles.length === 0) {
+                pedidosCocinaBody.innerHTML = '<tr><td colspan="6">No hay pedidos pendientes.</td></tr>';
+                pedidosDetalleBody.innerHTML = '<tr><td colspan="4">Sin especificaciones pendientes.</td></tr>';
+                totalItemsCocina.textContent = "0";
+                return;
+            }
+
+            pedidosCocinaBody.innerHTML = detalles.map(({ pedido, detalle }) => `
+                <tr>
+                    <td>${detalle.productoNombre}</td>
+                    <td>${detalle.productoId}</td>
+                    <td>${getDestinoPedido(pedido)}</td>
+                    <td>${detalle.cantidad}</td>
+                    <td>${pedido.estado}</td>
+                    <td>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button class="btn btn-warning" type="button" data-pedido-id="${pedido.id}" data-estado="en_preparacion">Preparar</button>
+                            <button class="btn btn-success" type="button" data-pedido-id="${pedido.id}" data-estado="listo">Listo</button>
+                            <button class="btn btn-primary" type="button" data-pedido-id="${pedido.id}" data-estado="entregado">Entregado</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join("");
+
+            pedidosDetalleBody.innerHTML = pedidosActivos.map((pedido) => `
+                <tr>
+                    <td>${pedido.mesaCodigo || "-"}</td>
+                    <td>${pedido.id}</td>
+                    <td>${pedido.tipo === "delivery" ? pedido.direccionDelivery : pedido.estado}</td>
+                    <td>${(pedido.detalles || []).reduce((sum, item) => sum + item.cantidad, 0)}</td>
+                </tr>
+            `).join("");
+
+            totalItemsCocina.textContent = detalles.reduce((sum, item) => sum + item.detalle.cantidad, 0);
+        };
+
+        const cargarPedidosCocina = async (forzar = false) => {
+            if (pedidosEnProceso && !forzar) return;
+            try {
+                const response = await fetch(PEDIDOS_API_URL);
+                if (!response.ok) throw new Error("No se pudieron cargar los pedidos.");
+                renderPedidos(await response.json());
+            } catch (error) {
+                pedidosCocinaBody.innerHTML = `<tr><td colspan="4">${error.message}</td></tr>`;
+                pedidosDetalleBody.innerHTML = '<tr><td colspan="4">Verifica que el backend esté encendido.</td></tr>';
+            }
+        };
+
+        pedidosCocinaBody.addEventListener("click", async (event) => {
+            const button = event.target.closest("button[data-pedido-id][data-estado]");
+            if (!button || pedidosEnProceso) return;
+
+            pedidosEnProceso = true;
+            button.disabled = true;
+            const originalText = button.textContent;
+            button.textContent = "...";
+
+            try {
+                const response = await fetch(`${PEDIDOS_API_URL}/${button.dataset.pedidoId}/estado`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ estado: button.dataset.estado })
+                });
+
+                if (!response.ok) {
+                    const message = await response.text();
+                    throw new Error(message || "No se pudo actualizar el pedido.");
+                }
+
+                await cargarPedidosCocina(true);
+            } catch (error) {
+                alert(error.message);
+                button.disabled = false;
+                button.textContent = originalText;
+            } finally {
+                pedidosEnProceso = false;
+            }
+        });
+
+        cargarPedidosCocina();
+        setInterval(cargarPedidosCocina, 10000);
+    </script>
 </body>
 
 </html>

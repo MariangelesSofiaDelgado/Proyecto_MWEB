@@ -1,4 +1,5 @@
 const PRODUCTS_API_URL = "http://localhost:8080/api/productos";
+const ORDERS_API_URL = "http://localhost:8080/api/pedidos";
 const categoryConfig = {
     piqueos: {
         title: "Piqueos & Entradas",
@@ -30,6 +31,7 @@ const formatter = new Intl.NumberFormat("es-PE", {
     minimumFractionDigits: 2
 });
 
+// Elementos del DOM
 const menuModalElement = document.getElementById("menuModal");
 const menuItemsContainer = document.getElementById("menuItems");
 const cartItemsContainer = document.getElementById("cartItems");
@@ -41,6 +43,8 @@ const menuStatusElement = document.getElementById("menuStatus");
 
 const menuModal = menuModalElement ? new bootstrap.Modal(menuModalElement) : null;
 const categoryButtons = document.querySelectorAll(".categoria-btn");
+
+// --- FUNCIONES DE UTILIDAD Y CARGA ---
 
 const normalizeText = (value) =>
     String(value || "")
@@ -61,23 +65,11 @@ const resetMenuData = () => {
 
 const mapCategoryKey = (categoryName) => {
     const normalizedCategory = normalizeText(categoryName);
-
-    if (normalizedCategory.includes("piqueo") || normalizedCategory.includes("entrada")) {
-        return "piqueos";
-    }
-    if (normalizedCategory.includes("sandwich")) {
-        return "sandwiches";
-    }
-    if (normalizedCategory.includes("fondo") || normalizedCategory.includes("plato")) {
-        return "fondos";
-    }
-    if (normalizedCategory.includes("postre")) {
-        return "postres";
-    }
-    if (normalizedCategory.includes("bebida")) {
-        return "bebidas";
-    }
-
+    if (normalizedCategory.includes("piqueo") || normalizedCategory.includes("entrada")) return "piqueos";
+    if (normalizedCategory.includes("sandwich")) return "sandwiches";
+    if (normalizedCategory.includes("fondo") || normalizedCategory.includes("plato")) return "fondos";
+    if (normalizedCategory.includes("postre")) return "postres";
+    if (normalizedCategory.includes("bebida")) return "bebidas";
     return "";
 };
 
@@ -99,7 +91,6 @@ const updateCategoryButtonsUI = () => {
 
 const setMenuStatus = (message, isError = false) => {
     if (!menuStatusElement) return;
-
     menuStatusElement.textContent = message;
     menuStatusElement.classList.toggle("text-danger", isError);
 };
@@ -110,15 +101,27 @@ const calculateCartTotal = () =>
         0
     );
 
+const readErrorMessage = async (response) => {
+    const fallbackMessage = "No se pudo registrar el pedido.";
+    try {
+        const contentType = response.headers.get("content-type") || "";
+        if (contentType.includes("application/json")) {
+            const data = await response.json();
+            return data.mensaje || data.message || data.detail || data.title || fallbackMessage;
+        }
+        return (await response.text()) || fallbackMessage;
+    } catch {
+        return fallbackMessage;
+    }
+};
+
 const mapProductsToMenuData = (products) => {
     resetMenuData();
-
     products
         .filter((product) => product && product.disponible)
         .forEach((product) => {
             const categoryName = product.categoria && product.categoria.nombre;
             const categoryKey = mapCategoryKey(categoryName);
-
             if (!categoryKey || !menuData[categoryKey]) return;
 
             menuData[categoryKey].items.push({
@@ -133,34 +136,23 @@ const mapProductsToMenuData = (products) => {
 const loadMenuData = async () => {
     try {
         const response = await fetch(PRODUCTS_API_URL);
-        if (!response.ok) {
-            throw new Error(`Error ${response.status}: no se pudo cargar el menú`);
-        }
-
+        if (!response.ok) throw new Error(`Error ${response.status}`);
         const products = await response.json();
-        if (!Array.isArray(products)) {
-            throw new Error("Respuesta inválida del backend");
-        }
-
         mapProductsToMenuData(products);
         updateCategoryButtonsUI();
         setMenuStatus("Menú actualizado.");
     } catch (error) {
-        console.error("Error al cargar productos del menú:", error);
+        console.error("Error al cargar productos:", error);
         resetMenuData();
         updateCategoryButtonsUI();
-        setMenuStatus("No se pudo cargar el menú en este momento.", true);
+        setMenuStatus("No se pudo cargar el menú.", true);
     }
 };
 
 const updateCartUI = () => {
     cartItemsContainer.innerHTML = "";
-
     if (cart.size === 0) {
-        const emptyItem = document.createElement("li");
-        emptyItem.className = "text-muted";
-        emptyItem.textContent = "Aún no agregas platos.";
-        cartItemsContainer.appendChild(emptyItem);
+        cartItemsContainer.innerHTML = '<li class="text-muted">Aún no agregas platos.</li>';
     } else {
         cart.forEach((item) => {
             const listItem = document.createElement("li");
@@ -172,7 +164,6 @@ const updateCartUI = () => {
             cartItemsContainer.appendChild(listItem);
         });
     }
-
     cartTotalElement.textContent = formatter.format(calculateCartTotal());
 };
 
@@ -201,10 +192,7 @@ const renderMenuItems = (categoryKey) => {
         checkbox.checked = cart.has(item.id);
         checkbox.addEventListener("change", (event) => {
             if (event.target.checked) {
-                cart.set(item.id, {
-                    ...item,
-                    quantity: 1
-                });
+                cart.set(item.id, { ...item, quantity: 1 });
             } else {
                 cart.delete(item.id);
             }
@@ -212,7 +200,6 @@ const renderMenuItems = (categoryKey) => {
         });
         menuItemsContainer.appendChild(wrapper);
     });
-
     menuModal.show();
 };
 
@@ -223,40 +210,124 @@ categoryButtons.forEach((button) => {
     });
 });
 
-const buildOrderPayload = () => ({
-    items: Array.from(cart.values()).map((item) => ({
-        productoId: item.id,
-        cantidad: item.quantity || 1,
-        precioUnitario: item.price,
-        subtotal: item.price * (item.quantity || 1)
-    })),
-    total: calculateCartTotal()
-});
+// ==========================================
+// LÓGICA DE CHECKOUT (INTEGRADA)
+// ==========================================
+const checkoutModalElement = document.getElementById("checkoutModal");
+const checkoutModal = checkoutModalElement ? new bootstrap.Modal(checkoutModalElement) : null;
 
-const submitOrder = async () => {
-    if (cart.size === 0) {
-        alert("Agrega al menos un plato antes de enviar el pedido.");
-        return;
-    }
+const radioPresencial = document.getElementById("tipoPresencial");
+const radioDelivery = document.getElementById("tipoDelivery");
+const seccionPresencial = document.getElementById("seccionPresencial");
+const seccionDelivery = document.getElementById("seccionDelivery");
+const confirmCheckoutBtn = document.getElementById("confirmCheckoutBtn");
 
-    const payload = buildOrderPayload();
+// Mostrar/Ocultar campos según el tipo de pedido
+if (radioPresencial && radioDelivery) {
+    radioPresencial.addEventListener("change", () => {
+        seccionPresencial.classList.remove("d-none");
+        seccionDelivery.classList.add("d-none");
+    });
 
-    try {
-        // agregar conexion con backend aqui: enviar pedido a Spring Boot
-        // await fetch("/api/pedidos", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-        // agregar conexion con backend aqui: manejar respuesta (id de pedido, estado y tiempo estimado)
-        console.log("Pedido listo para enviar:", payload);
-        alert("Pedido listo para enviar. (Pendiente integración backend)");
-    } catch (error) {
-        console.error("Error al enviar pedido", error);
-        alert("No se pudo enviar el pedido. Intenta nuevamente.");
-    }
-};
-
-if (submitOrderButton) {
-    submitOrderButton.addEventListener("click", submitOrder);
+    radioDelivery.addEventListener("change", () => {
+        seccionDelivery.classList.remove("d-none");
+        seccionPresencial.classList.add("d-none");
+    });
 }
 
+// Abrir el modal de Checkout desde el carrito
+if (submitOrderButton) {
+    submitOrderButton.addEventListener("click", () => {
+        if (cart.size === 0) {
+            alert("Agrega al menos un plato al carrito antes de enviar el pedido.");
+            return;
+        }
+        
+        const token = localStorage.getItem("token");
+        if (!token) {
+            alert("Por favor, inicia sesión para realizar un pedido.");
+            return;
+        }
+        
+        if (checkoutModal) checkoutModal.show();
+    });
+}
+
+// Confirmar y enviar el pedido a Spring Boot
+if (confirmCheckoutBtn) {
+    confirmCheckoutBtn.addEventListener("click", async () => {
+        const tipo = radioPresencial.checked ? "presencial" : "delivery";
+        let mesaId = null;
+        let direccion = null;
+
+        if (tipo === "presencial") {
+            const mesaInput = document.getElementById("numeroMesa");
+            mesaId = mesaInput ? mesaInput.value : null;
+            if (!mesaId) {
+                alert("Por favor, selecciona tu número de mesa.");
+                return;
+            }
+        } else {
+            const dirInput = document.getElementById("direccionDelivery");
+            direccion = dirInput ? dirInput.value.trim() : null;
+            if (!direccion) {
+                alert("Por favor, ingresa una dirección para el delivery.");
+                return;
+            }
+        }
+
+        const payload = {
+            tipoPedido: tipo,
+            mesaId: mesaId ? parseInt(mesaId) : null,
+            direccion: direccion,
+            items: Array.from(cart.values()).map((item) => ({
+                productoId: item.id,
+                cantidad: item.quantity || 1,
+                precioUnitario: item.price
+            })),
+            total: calculateCartTotal()
+        };
+
+        confirmCheckoutBtn.disabled = true;
+        confirmCheckoutBtn.textContent = "Registrando...";
+
+        try {
+            const response = await fetch(ORDERS_API_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                throw new Error(await readErrorMessage(response));
+            }
+
+            const pedidoRegistrado = await response.json();
+            const numeroPedido = pedidoRegistrado.id ? ` #${pedidoRegistrado.id}` : "";
+
+            alert(`¡Pedido${numeroPedido} registrado con éxito! Tu orden llegará a la cocina en breve.`);
+            if (checkoutModal) checkoutModal.hide();
+
+            cart.clear();
+            updateCartUI();
+
+            const mesaInput = document.getElementById("numeroMesa");
+            const dirInput = document.getElementById("direccionDelivery");
+            if (mesaInput) mesaInput.value = "";
+            if (dirInput) dirInput.value = "";
+        } catch (error) {
+            console.error("Error al registrar pedido:", error);
+            alert(error.message || "No se pudo registrar el pedido. Verifica que el backend esté encendido.");
+        } finally {
+            confirmCheckoutBtn.disabled = false;
+            confirmCheckoutBtn.textContent = "Confirmar Pedido";
+        }
+    });
+}
+
+// Inicialización
 updateCartUI();
 resetMenuData();
 updateCategoryButtonsUI();

@@ -1,8 +1,7 @@
-const TOTAL_MESAS = 12;
+const TOTAL_MESAS_MOCK = 4;
 
 const API_CONFIG = {
-    // agregar conexion con backend aqui: configurar URL real del servicio de reservas en producción
-    baseUrl: window.RESERVAS_API_BASE_URL || "http://localhost:3000/api",
+    baseUrl: window.RESERVAS_API_BASE_URL || "http://localhost:8080/api",
     estadoMesasPath: "/mesas/estado",
     reservarPath: "/reservas"
 };
@@ -17,9 +16,11 @@ let mesasEstado = [];
 let mesaSeleccionada = null;
 
 const getMockMesasEstado = () =>
-    // agregar conexion con backend aqui: este estado es temporal mientras no responda la API de mesas
-    Array.from({ length: TOTAL_MESAS }, (_, index) => ({
+    Array.from({ length: TOTAL_MESAS_MOCK }, (_, index) => ({
         id: index + 1,
+        codigo: `M0${index + 1}`,
+        ubicacion: index < 2 ? "interior" : "exterior",
+        estado: index === 1 ? "ocupada" : "libre",
         libre: Math.random() > 0.35
     }));
 
@@ -31,26 +32,18 @@ const normalizeMesasEstado = (payload) => {
     const normalized = payload
         .map((mesa) => ({
             id: Number(mesa.id),
+            codigo: mesa.codigo || `M${String(mesa.id).padStart(2, "0")}`,
+            ubicacion: mesa.ubicacion || "",
+            estado: mesa.estado || (mesa.libre ? "libre" : "ocupada"),
             libre: Boolean(mesa.libre)
         }))
-        .filter((mesa) => Number.isInteger(mesa.id) && mesa.id >= 1 && mesa.id <= TOTAL_MESAS);
+        .filter((mesa) => Number.isInteger(mesa.id) && mesa.id >= 1)
+        .sort((a, b) => a.id - b.id);
 
-    if (normalized.length === TOTAL_MESAS) {
-        return normalized.sort((a, b) => a.id - b.id);
-    }
-
-    const map = new Map(normalized.map((mesa) => [mesa.id, mesa.libre]));
-    return Array.from({ length: TOTAL_MESAS }, (_, index) => {
-        const id = index + 1;
-        return {
-            id,
-            libre: map.has(id) ? map.get(id) : true
-        };
-    });
+    return normalized.length > 0 ? normalized : getMockMesasEstado();
 };
 
 const fetchMesasEstado = async () => {
-    // agregar conexion con la API de mesas aqui: consumir disponibilidad en tiempo real
     const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.estadoMesasPath}`);
     if (!response.ok) {
         throw new Error("No se pudo obtener el estado de las mesas.");
@@ -60,7 +53,6 @@ const fetchMesasEstado = async () => {
 };
 
 const enviarReserva = async (mesaId) => {
-    // agregar conexion con la API de reservas aqui: registrar cliente, fecha y turno seleccionado
     const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.reservarPath}`, {
         method: "POST",
         headers: {
@@ -70,7 +62,8 @@ const enviarReserva = async (mesaId) => {
     });
 
     if (!response.ok) {
-        throw new Error("No se pudo registrar la reserva.");
+        const errorMessage = await response.text();
+        throw new Error(errorMessage || "No se pudo registrar la reserva.");
     }
 
     return response.json();
@@ -100,7 +93,8 @@ const renderMesas = () => {
         btn.type = "button";
         btn.className = `mesa-btn ${mesa.libre ? "mesa-libre" : "mesa-ocupada"}`;
         btn.dataset.mesaId = mesa.id;
-        btn.textContent = `Mesa ${mesa.id}`;
+        btn.textContent = mesa.codigo || `Mesa ${mesa.id}`;
+        btn.title = `${mesa.ubicacion || "sin ubicación"} - ${mesa.estado || ""}`;
         btn.disabled = !mesa.libre;
 
         btn.addEventListener("click", () => {
@@ -156,9 +150,9 @@ if (reservaModal && mesasGrid && mesaSeleccionadaTexto && confirmarReservaBtn) {
             }
             mesaSeleccionada = null;
             renderMesas();
-        } catch {
+        } catch (error) {
             mostrarFeedback(
-                "No se pudo confirmar en el backend. La interfaz quedó lista para conectarse cuando el API esté activo.",
+                error.message || "No se pudo confirmar la reserva. Verifica que el backend esté encendido.",
                 "warning"
             );
             mesaSeleccionada = null;
