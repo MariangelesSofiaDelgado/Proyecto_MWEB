@@ -92,7 +92,7 @@ const updateCategoryButtonsUI = () => {
         button.classList.toggle("disabled", !hasItems);
 
         if (labelElement && category) {
-            labelElement.textContent = category.title.toUpperCase();
+            labelElement.textContent = category.title;
         }
     });
 };
@@ -103,6 +103,12 @@ const setMenuStatus = (message, isError = false) => {
     menuStatusElement.textContent = message;
     menuStatusElement.classList.toggle("text-danger", isError);
 };
+
+const calculateCartTotal = () =>
+    Array.from(cart.values()).reduce(
+        (sum, item) => sum + item.price * (item.quantity || 1),
+        0
+    );
 
 const mapProductsToMenuData = (products) => {
     resetMenuData();
@@ -167,11 +173,7 @@ const updateCartUI = () => {
         });
     }
 
-    const total = Array.from(cart.values()).reduce(
-        (sum, item) => sum + item.price * (item.quantity || 1),
-        0
-    );
-    cartTotalElement.textContent = formatter.format(total);
+    cartTotalElement.textContent = formatter.format(calculateCartTotal());
 };
 
 const renderMenuItems = (categoryKey) => {
@@ -228,10 +230,7 @@ const buildOrderPayload = () => ({
         precioUnitario: item.price,
         subtotal: item.price * (item.quantity || 1)
     })),
-    total: Array.from(cart.values()).reduce(
-        (sum, item) => sum + item.price * (item.quantity || 1),
-        0
-    )
+    total: calculateCartTotal()
 });
 
 const submitOrder = async () => {
