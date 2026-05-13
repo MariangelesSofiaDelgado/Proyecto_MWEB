@@ -115,10 +115,6 @@ const mapProductsToMenuData = (products) => {
 
             if (!categoryKey || !menuData[categoryKey]) return;
 
-            if (categoryName) {
-                menuData[categoryKey].title = categoryName.trim();
-            }
-
             menuData[categoryKey].items.push({
                 id: product.id,
                 name: product.nombre,
@@ -171,7 +167,10 @@ const updateCartUI = () => {
         });
     }
 
-    const total = Array.from(cart.values()).reduce((sum, item) => sum + item.price, 0);
+    const total = Array.from(cart.values()).reduce(
+        (sum, item) => sum + item.price * (item.quantity || 1),
+        0
+    );
     cartTotalElement.textContent = formatter.format(total);
 };
 
@@ -200,7 +199,10 @@ const renderMenuItems = (categoryKey) => {
         checkbox.checked = cart.has(item.id);
         checkbox.addEventListener("change", (event) => {
             if (event.target.checked) {
-                cart.set(item.id, item);
+                cart.set(item.id, {
+                    ...item,
+                    quantity: 1
+                });
             } else {
                 cart.delete(item.id);
             }
@@ -222,11 +224,14 @@ categoryButtons.forEach((button) => {
 const buildOrderPayload = () => ({
     items: Array.from(cart.values()).map((item) => ({
         productoId: item.id,
-        cantidad: 1,
+        cantidad: item.quantity || 1,
         precioUnitario: item.price,
-        subtotal: item.price
+        subtotal: item.price * (item.quantity || 1)
     })),
-    total: Array.from(cart.values()).reduce((sum, item) => sum + item.price, 0)
+    total: Array.from(cart.values()).reduce(
+        (sum, item) => sum + item.price * (item.quantity || 1),
+        0
+    )
 });
 
 const submitOrder = async () => {
