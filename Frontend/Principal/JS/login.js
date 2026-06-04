@@ -115,7 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         window.location.href = "../../Principal/HTML/index.html";
                     } else {
                         // Si es admin, mesero, cocina o caja, va al Dashboard
-                        window.location.href = "../../Dashboard/HTML/OtrasHerramientas.html";
+                        window.location.href = "../../Dashboard/HTML/Dashboard.html";
                     }
                 } else {
                     // Si el backend responde con error (ej. 401 Unauthorized)
