@@ -33,10 +33,11 @@
     <div class="dashboard-wrapper">
         <div class="dashboard-grid">
             <aside class="col-left">
-                <div class="restaurant-card">
+                <div class="restaurant-card p-3">
                     <div class="restaurant-header">
                         <img src="../../../img/ICON1.png" alt="icon" class="icon-img">
                     </div>
+
                     <div class="left-options mt-3 d-grid gap-2">
                         <!-- agregar conexion con backend aqui: mostrar módulos permitidos según rol del usuario -->
                         <a href="Gestion DeSala.html" class="btn-pdf js-dashboard-link" data-title="Gestión de Sala">Gestión de Sala</a>
@@ -49,7 +50,9 @@
             </aside>
 
             <main class="col-right">
-                <h2 class="right-title">Dashboard</h2>
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                    <h2 class="right-title mb-0">Dashboard</h2>
+                </div>
 
                 <section class="card-panel module-viewer">
                     <div class="d-flex justify-content-between align-items-center gap-2 mb-3 flex-wrap">
@@ -60,12 +63,15 @@
                         </div>
                     </div>
 
-                    <iframe
-                        id="dashboard-content-frame"
-                        class="module-frame"
-                        title="Contenido del módulo"
-                        src="Gestion DeSala.html"
-                    ></iframe>
+                    <div class="w-100">
+                        <iframe
+                            id="dashboard-content-frame"
+                            class="module-frame w-100"
+                            title="Contenido del módulo"
+                            src="Gestion DeSala.html"
+                        ></iframe>
+                    </div>
+
                     <!-- agregar conexion con backend aqui: cargar alertas/notificaciones del dashboard -->
                 </section>
             </main>
