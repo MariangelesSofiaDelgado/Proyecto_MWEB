@@ -95,6 +95,18 @@ INSERT INTO usuarios (id, nombre, email, password_hash, rol_id, activo) VALUES
 (3, 'Carlos Ramírez', 'carlos.ramirez@mail.com', 'hash789', 3, TRUE),
 (4, 'Ana Torres', 'ana.torres@mail.com', 'hash321', 4, TRUE);
 
+-- Ejemplo: si el usuario "admin" tenía password "1234"
+-- El hash BCrypt de "1234" con strength 10:
+-- Solo una vez
+UPDATE usuarios SET password_hash = '$2a$12$uCsFMxJ6pzNHOB3JhovoN.GJr77QYc26mKMn/Nvfhzcr7Jczs3rgO'
+WHERE email = 'juan.perez@mail.com';
+UPDATE usuarios SET password_hash = '$2a$12$lW8dJSSwmg8g2yuIjxB25OLsrYQzpZaVGm23AcE94Ogl.kkzF5NRu'
+WHERE email = 'maria.lopez@mail.com';
+UPDATE usuarios SET password_hash = '$2a$12$UOOEQhjJEZ555dnKSyyqxegzTg.knJmYkSlNR7d7ts0A.C00LmQry'
+WHERE email = 'carlos.ramirez@mail.com';
+UPDATE usuarios SET password_hash = '$2a$12$DTUR/RMVOY1bBwwgC6oqhulqeopxHrc6J.7QZrYuQgwfKaMqRYEci'
+WHERE email = 'ana.torres@mail.com';
+
 -- MESAS
 INSERT INTO mesas (codigo, ubicacion, estado) VALUES
 ('M01', 'interior', 'libre'), ('M02', 'interior', 'ocupada'),
