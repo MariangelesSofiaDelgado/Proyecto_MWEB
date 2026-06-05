@@ -146,3 +146,5 @@ INSERT INTO pedido_detalle (pedido_id, producto_id, cantidad, precio_unitario, n
 INSERT INTO facturas (pedido_id, tipo, ruc, razon_social, total) VALUES
 (1, 'boleta', NULL, 'Cliente Final', 35.00),
 (2, 'factura', '20123456789', 'Empresa Naviera SAC', 46.00);
+
+
