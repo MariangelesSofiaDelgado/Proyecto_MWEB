@@ -60,28 +60,61 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                     </div>
                     <div class="modal-body">
-                        <form>
+                        <form id="loginForm">
                             <div class="mb-3">
                                 <label for="exampleInputEmail1" class="form-label">Correo electrónico</label>
-                                <input type="email" class="form-control" id="exampleInputEmail1"
-                                    aria-describedby="emailHelp" required>
-                                <div id="emailHelp" class="form-text">Nunca compartiremos tu correo con nadie más.</div>
+                                <input type="email" class="form-control" id="exampleInputEmail1" required>
                             </div>
                             <div class="mb-3">
                                 <label for="exampleInputPassword1" class="form-label">Contraseña</label>
                                 <input type="password" class="form-control" id="exampleInputPassword1" required>
-                            </div>
-                            <div class="mb-3 form-check">
-                                <input type="checkbox" class="form-check-input" id="exampleCheck1">
-                                <label class="form-check-label" for="exampleCheck1">Recordarme</label>
                             </div>
                             <button type="submit" class="btn btn-primary w-100">Iniciar sesión</button>
                         </form>
                     </div>
                     <div class="modal-footer d-flex justify-content-between">
                         <a href="#" class="text-decoration-none text-muted small">¿Olvidaste tu contraseña?</a>
-                        <a href="#" class="text-decoration-none small">¿No tienes cuenta?
-                            <strong>Regístrate</strong></a>
+                        <a href="#" id="linkToRegister" class="text-decoration-none small">
+                            ¿No tienes cuenta? <strong>Regístrate</strong>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="crearCuentaModal" tabindex="-1" aria-labelledby="crearCuentaModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="crearCuentaModalLabel">Crear Cuenta</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="registerForm">
+                            <div class="mb-3">
+                                <label for="regNombre" class="form-label">Nombre completo</label>
+                                <input type="text" class="form-control" id="regNombre" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="regEmail" class="form-label">Correo electrónico</label>
+                                <input type="email" class="form-control" id="regEmail" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="regPassword" class="form-label">Contraseña</label>
+                                <input type="password" class="form-control" id="regPassword" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="regConfirmPassword" class="form-label">Confirmar Contraseña</label>
+                                <input type="password" class="form-control" id="regConfirmPassword" required>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100">Registrarse</button>
+                        </form>
+                    </div>
+                    <div class="modal-footer d-flex justify-content-center">
+                        <a href="#" id="linkToLogin" class="text-decoration-none small">
+                            ¿Ya tienes cuenta? <strong>Inicia sesión</strong>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -166,7 +199,8 @@
             </div>
         </div>
 
-        <div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel" aria-hidden="true">
+        <div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel"
+            aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -177,11 +211,14 @@
                         <div class="mb-3">
                             <label class="form-label fw-bold">¿Cómo deseas tu pedido?</label>
                             <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="tipoPedido" id="tipoPresencial" value="presencial" checked>
-                                <label class="form-check-label" for="tipoPresencial">Consumo en el Local (Presencial)</label>
+                                <input class="form-check-input" type="radio" name="tipoPedido" id="tipoPresencial"
+                                    value="presencial" checked>
+                                <label class="form-check-label" for="tipoPresencial">Consumo en el Local
+                                    (Presencial)</label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" name="tipoPedido" id="tipoDelivery" value="delivery">
+                                <input class="form-check-input" type="radio" name="tipoPedido" id="tipoDelivery"
+                                    value="delivery">
                                 <label class="form-check-label" for="tipoDelivery">Delivery (Para llevar)</label>
                             </div>
                         </div>
@@ -199,11 +236,13 @@
 
                         <div id="seccionDelivery" class="mb-3 d-none">
                             <label for="direccionDelivery" class="form-label fw-semibold">Dirección de entrega</label>
-                            <input type="text" class="form-control" id="direccionDelivery" placeholder="Ej: Av. Los Pescadores 123">
+                            <input type="text" class="form-control" id="direccionDelivery"
+                                placeholder="Ej: Av. Los Pescadores 123">
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">Cancelar</button>
                         <button type="button" class="btn btn-primary" id="confirmCheckoutBtn">Confirmar Pedido</button>
                     </div>
                 </div>
@@ -222,8 +261,8 @@
             crossorigin="anonymous"></script>
     </div>
     <script src="../../Principal/JS/nav.js"></script>
-    <script src="../../Principal/JS/menu.js"></script>
     <script src="../../Principal/JS/login.js"></script>
+    <script src="../../Principal/JS/menu.js"></script>
 </body>
 
 </html>

@@ -44,7 +44,10 @@ const normalizeMesasEstado = (payload) => {
 };
 
 const fetchMesasEstado = async () => {
-    const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.estadoMesasPath}`);
+    const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.estadoMesasPath}`, {
+        method: "GET",
+        headers: authHeaders() // <--- INTEGRADO AQUÍ 
+    });
     if (!response.ok) {
         throw new Error("No se pudo obtener el estado de las mesas.");
     }
@@ -55,9 +58,7 @@ const fetchMesasEstado = async () => {
 const enviarReserva = async (mesaId) => {
     const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.reservarPath}`, {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
+        headers: authHeaders(), // <--- INTEGRADO AQUÍ (Protege la creación de la reserva)
         body: JSON.stringify({ mesaId })
     });
 
@@ -137,6 +138,13 @@ if (reservaModal && mesasGrid && mesaSeleccionadaTexto && confirmarReservaBtn) {
     reservaModal.addEventListener("show.bs.modal", cargarEstadoMesas);
 
     confirmarReservaBtn.addEventListener("click", async () => {
+        // Verificar si el usuario está logueado antes de intentar enviar
+        const token = localStorage.getItem("token");
+        if (!token) {
+            mostrarFeedback("Debes iniciar sesión para realizar una reserva.", "warning");
+            return;
+        }
+
         if (!mesaSeleccionada) return;
 
         confirmarReservaBtn.disabled = true;
@@ -153,7 +161,7 @@ if (reservaModal && mesasGrid && mesaSeleccionadaTexto && confirmarReservaBtn) {
         } catch (error) {
             mostrarFeedback(
                 error.message || "No se pudo confirmar la reserva. Verifica que el backend esté encendido.",
-                "warning"
+                "danger"
             );
             mesaSeleccionada = null;
             actualizarSeleccionUI();

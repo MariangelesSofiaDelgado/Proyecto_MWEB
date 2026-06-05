@@ -1,3 +1,29 @@
+// ==========================================
+// FUNCIONES UTILITARIAS GLOBALES
+// ==========================================
+
+// Esta función debe estar disponible para menu.js y los JS del dashboard.
+// Si usas módulos, deberías exportarla. Si cargas este script globalmente,
+// quedará disponible para las demás funciones.
+function authHeaders() {
+    const token = localStorage.getItem("token");
+
+    // Si no hay token, solo devuelve el Content-Type para evitar errores de sintaxis
+    if (!token) {
+        return {
+            "Content-Type": "application/json",
+        };
+    }
+
+    return {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+    };
+}
+
+// ==========================================
+// LÓGICA DE SESIÓN Y FORMULARIOS (LOGIN/REGISTRO)
+// ==========================================
 document.addEventListener("DOMContentLoaded", () => {
     const publicHomePath = "../../Principal/HTML/index.html";
 
@@ -23,7 +49,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (label) {
-            label.textContent = nombre ? `${nombre} | Cerrar sesión` : "Cerrar sesión";
+            label.textContent = nombre
+                ? `${nombre} | Cerrar sesión`
+                : "Cerrar sesión";
         }
 
         navSessionButton.removeAttribute("data-bs-toggle");
@@ -72,20 +100,19 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    const loginForm = document.getElementById("loginForm")
-        || document.getElementById("exampleInputEmail1")?.closest("form");
+    const loginForm =
+        document.getElementById("loginForm") ||
+        document.getElementById("exampleInputEmail1")?.closest("form");
 
     if (loginForm) {
         loginForm.addEventListener("submit", async (e) => {
-            e.preventDefault(); // Evita que la página se recargue al enviar el formulario
+            e.preventDefault();
 
-            // 2. Capturamos los valores usando los IDs que ya tienes en tu HTML
             const email = document.getElementById("exampleInputEmail1").value;
             const password = document.getElementById("exampleInputPassword1").value;
 
             try {
-                // 3. Hacemos la petición POST al futuro backend de Spring Boot
-                // Nota: Asumimos que Spring Boot correrá en localhost:8080
+                // AQUÍ NO VA authHeaders() PORQUE ES EL LOGIN PÚBLICO
                 const response = await fetch("http://localhost:8080/api/auth/login", {
                     method: "POST",
                     headers: {
@@ -94,12 +121,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     body: JSON.stringify({ email: email, password: password }),
                 });
 
-                // 4. Verificamos si la respuesta es exitosa (código 200 OK)
                 if (response.ok) {
                     const data = await response.json();
 
-                    // 5. Guardamos el Token y el Rol en el LocalStorage
-                    // (Asumimos que el backend nos devolverá un token y el rol del usuario)
                     localStorage.setItem("token", data.token);
                     localStorage.setItem("rol", data.rol);
                     localStorage.setItem("nombre", data.nombre);
@@ -107,24 +131,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     alert(`¡Bienvenido/a, ${data.nombre}!`);
                     const rolAsignado = data.rol ? data.rol.trim().toLowerCase() : "";
-                    console.log("Rol recibido desde el backend:", rolAsignado); // <-- Para ver qué llega exactamente
+                    console.log("Rol recibido desde el backend:", rolAsignado);
 
-                    // 6. Redirección basada en el Rol (RBAC)
                     if (rolAsignado === "cliente" || rolAsignado.includes("cliente")) {
-                        // Si es cliente, se queda en la vista pública (o se recarga para actualizar el menú)
                         window.location.href = "../../Principal/HTML/index.html";
                     } else {
-                        // Si es admin, mesero, cocina o caja, va al Dashboard
                         window.location.href = "../../Dashboard/HTML/Dashboard.html";
                     }
                 } else {
-                    // Si el backend responde con error (ej. 401 Unauthorized)
                     alert(
                         "Correo o contraseña incorrectos. Por favor, intenta de nuevo.",
                     );
                 }
             } catch (error) {
-                // Si el servidor de Spring Boot está apagado o hay un error de red
                 console.error("Error de conexión:", error);
                 alert(
                     "No se pudo conectar con el servidor. Verifica que el backend esté encendido.",
@@ -145,14 +164,13 @@ document.addEventListener("DOMContentLoaded", () => {
             const confirmPassword =
                 document.getElementById("regConfirmPassword").value;
 
-            // 1. Validar que las contraseñas sean iguales
             if (password !== confirmPassword) {
                 alert("Las contraseñas no coinciden. Inténtalo de nuevo.");
-                return; // Detiene la ejecución
+                return;
             }
 
             try {
-                // 2. Enviar datos al futuro backend en Spring Boot
+                // AQUÍ TAMPOCO VA authHeaders() PORQUE ES EL REGISTRO PÚBLICO
                 const response = await fetch(
                     "http://localhost:8080/api/auth/registro",
                     {
@@ -160,7 +178,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         headers: {
                             "Content-Type": "application/json",
                         },
-                        // El backend le asignará el rol 'cliente' por defecto a este nuevo usuario
                         body: JSON.stringify({
                             nombre: nombre,
                             email: email,
@@ -171,13 +188,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (response.ok) {
                     alert("¡Cuenta creada con éxito! Ahora puedes iniciar sesión.");
-
-                    // Limpiar formulario
                     registerForm.reset();
-
                     switchModal("crearCuentaModal", "registroModal");
                 } else {
-                    // Posibles errores: el correo ya existe, etc.
                     const errorData = await response.text();
                     alert(`Error al registrarse: ${errorData}`);
                 }
@@ -188,5 +201,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // Inicializar UI al cargar la página
     setupPublicSessionUI();
 });

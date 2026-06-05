@@ -61,28 +61,61 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                     </div>
                     <div class="modal-body">
-                        <form>
+                        <form id="loginForm">
                             <div class="mb-3">
                                 <label for="exampleInputEmail1" class="form-label">Correo electrónico</label>
-                                <input type="email" class="form-control" id="exampleInputEmail1"
-                                    aria-describedby="emailHelp" required>
-                                <div id="emailHelp" class="form-text">Nunca compartiremos tu correo con nadie más.</div>
+                                <input type="email" class="form-control" id="exampleInputEmail1" required>
                             </div>
                             <div class="mb-3">
                                 <label for="exampleInputPassword1" class="form-label">Contraseña</label>
                                 <input type="password" class="form-control" id="exampleInputPassword1" required>
-                            </div>
-                            <div class="mb-3 form-check">
-                                <input type="checkbox" class="form-check-input" id="exampleCheck1">
-                                <label class="form-check-label" for="exampleCheck1">Recordarme</label>
                             </div>
                             <button type="submit" class="btn btn-primary w-100">Iniciar sesión</button>
                         </form>
                     </div>
                     <div class="modal-footer d-flex justify-content-between">
                         <a href="#" class="text-decoration-none text-muted small">¿Olvidaste tu contraseña?</a>
-                        <a href="#" class="text-decoration-none small">¿No tienes cuenta?
-                            <strong>Regístrate</strong></a>
+                        <a href="#" id="linkToRegister" class="text-decoration-none small">
+                            ¿No tienes cuenta? <strong>Regístrate</strong>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="crearCuentaModal" tabindex="-1" aria-labelledby="crearCuentaModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="crearCuentaModalLabel">Crear Cuenta</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="registerForm">
+                            <div class="mb-3">
+                                <label for="regNombre" class="form-label">Nombre completo</label>
+                                <input type="text" class="form-control" id="regNombre" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="regEmail" class="form-label">Correo electrónico</label>
+                                <input type="email" class="form-control" id="regEmail" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="regPassword" class="form-label">Contraseña</label>
+                                <input type="password" class="form-control" id="regPassword" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="regConfirmPassword" class="form-label">Confirmar Contraseña</label>
+                                <input type="password" class="form-control" id="regConfirmPassword" required>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100">Registrarse</button>
+                        </form>
+                    </div>
+                    <div class="modal-footer d-flex justify-content-center">
+                        <a href="#" id="linkToLogin" class="text-decoration-none small">
+                            ¿Ya tienes cuenta? <strong>Inicia sesión</strong>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -107,19 +140,19 @@
                         <h5 class="modal-title" id="reservaMesasModalLabel">Selecciona tu mesa</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                     </div>
-                        <div class="modal-body">
-                            <div id="reservaFeedback" class="alert alert-info py-2 d-none mb-3" role="alert"></div>
-                            <div class="d-flex justify-content-center gap-3 flex-wrap mb-3">
+                    <div class="modal-body">
+                        <div id="reservaFeedback" class="alert alert-info py-2 d-none mb-3" role="alert"></div>
+                        <div class="d-flex justify-content-center gap-3 flex-wrap mb-3">
                             <span class="badge rounded-pill text-bg-success">Libre</span>
                             <span class="badge rounded-pill text-bg-danger">Ocupada</span>
                             <span class="badge rounded-pill text-bg-warning text-dark">Seleccionada</span>
-                            </div>
-                            <!-- agregar conexion con backend aqui: mostrar disponibilidad real de mesas desde la API -->
-                            <div id="mesasGrid" class="mesas-grid" aria-live="polite"></div>
-                            <p id="mesaSeleccionadaTexto" class="text-center mt-3 mb-0 fw-semibold text-body-secondary">
-                                Ninguna mesa seleccionada.
-                            </p>
                         </div>
+                        <!-- agregar conexion con backend aqui: mostrar disponibilidad real de mesas desde la API -->
+                        <div id="mesasGrid" class="mesas-grid" aria-live="polite"></div>
+                        <p id="mesaSeleccionadaTexto" class="text-center mt-3 mb-0 fw-semibold text-body-secondary">
+                            Ninguna mesa seleccionada.
+                        </p>
+                    </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                         <!-- agregar conexion con backend aqui: confirmar reserva con datos del cliente -->
@@ -144,8 +177,8 @@
             crossorigin="anonymous"></script>
     </div>
     <script src="../../Principal/JS/nav.js"></script>
-    <script src="../../Principal/JS/reservas.js"></script>
     <script src="../../Principal/JS/login.js"></script>
+    <script src="../../Principal/JS/reservas.js"></script>
 </body>
 
 </html>

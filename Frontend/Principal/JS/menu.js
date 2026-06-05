@@ -135,7 +135,10 @@ const mapProductsToMenuData = (products) => {
 
 const loadMenuData = async () => {
     try {
-        const response = await fetch(PRODUCTS_API_URL);
+        const response = await fetch(PRODUCTS_API_URL, {
+            method: "GET",
+            headers: authHeaders() // <--- INTEGRADO AQUÍ (opcional para GET, pero buena práctica)
+        });
         if (!response.ok) throw new Error(`Error ${response.status}`);
         const products = await response.json();
         mapProductsToMenuData(products);
@@ -294,9 +297,7 @@ if (confirmCheckoutBtn) {
         try {
             const response = await fetch(ORDERS_API_URL, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                headers: authHeaders(), // <--- INTEGRADO AQUÍ (El token se inyecta para proteger el POST)
                 body: JSON.stringify(payload)
             });
 
