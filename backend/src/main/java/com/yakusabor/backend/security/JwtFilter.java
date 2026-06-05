@@ -37,9 +37,9 @@ public class JwtFilter extends OncePerRequestFilter {
 
             if (jwtUtil.esValido(token)) {
                 String email = jwtUtil.extraerEmail(token);
-                String rol = jwtUtil.extraerRol(token);
+                String rol   = jwtUtil.extraerRol(token);
 
-                // Verificamos que el usuario aún existe en BD
+                // Verificar que el usuario aún exista en BD antes de autenticar
                 if (usuarioRepository.findByEmail(email).isPresent()) {
                     var auth = new UsernamePasswordAuthenticationToken(
                             email,

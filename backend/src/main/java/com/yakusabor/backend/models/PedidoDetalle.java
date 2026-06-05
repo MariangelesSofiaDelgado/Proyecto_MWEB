@@ -41,4 +41,8 @@ public class PedidoDetalle {
 
     @Column(length = 255)
     private String notas;
+
+    // En PedidoDetalle.java — agrega este campo
+    @Column(name = "estado_detalle", nullable = false, length = 20)
+    private String estadoDetalle = "pendiente";
 }

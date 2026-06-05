@@ -1,245 +1,88 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión Cocina</title>
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../CSS/styledash.css">
     <style>
-        body {
-            background: transparent;
-        }
+        body { background: transparent; }
 
-        .kitchen-dashboard {
-            padding: 16px;
-        }
+        .kitchen-dashboard { padding: 16px; }
 
-        .kitchen-section {
-            background: rgba(255, 255, 255, 0.92);
+        /* Tarjeta por mesa */
+        .mesa-card {
+            background: rgba(255, 255, 255, 0.93);
             border: 1px solid #dbe3ea;
-            border-radius: 8px;
+            border-radius: 10px;
             padding: 16px;
-            margin-bottom: 18px;
-            overflow: hidden;
+            margin-bottom: 20px;
         }
-
-        .kitchen-section-title {
+        .mesa-card-title {
             color: #1b3a57;
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             font-weight: 700;
             margin-bottom: 12px;
-        }
-
-        .kitchen-table-wrap {
-            width: 100%;
-            overflow-x: auto;
-        }
-
-        .kitchen-table {
-            margin-bottom: 0;
-            min-width: 920px;
-            vertical-align: middle;
-        }
-
-        .kitchen-table th,
-        .kitchen-table td {
-            white-space: normal;
-            overflow-wrap: anywhere;
-        }
-
-        .kitchen-actions {
             display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .mesa-card-title .badge { font-size: 0.75rem; }
+
+        .kitchen-table { margin-bottom: 0; }
+
+        /* Botones de acción */
+        .kitchen-actions { display: flex; flex-wrap: wrap; gap: 5px; }
+        .kitchen-actions .btn { font-size: 0.78rem; padding: 3px 8px; }
+
+        /* Badges de estado por plato */
+        .estado-badge {
+            font-size: 0.78rem;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .estado-pendiente       { background: #f0f0f0; color: #555; }
+        .estado-en_preparacion  { background: #fff3cd; color: #856404; }
+        .estado-listo           { background: #d1e7dd; color: #0f5132; }
+        .estado-entregado       { background: #cfe2ff; color: #084298; }
+
+        /* Barra superior */
+        .refresh-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
             flex-wrap: wrap;
-            gap: 6px;
-            min-width: 220px;
         }
-
-        .kitchen-actions .btn {
-            flex: 1 1 auto;
-            min-width: 68px;
-        }
-
-        .spec-table {
-            min-width: 760px;
-        }
+        #ultimaActualizacion { font-size: 0.82rem; color: #666; }
+        #sinPedidos { display: none; }
     </style>
 </head>
-
 <body>
-
     <main class="container-fluid kitchen-dashboard">
-        <section class="kitchen-section">
-            <h2 class="kitchen-section-title">Pedidos activos</h2>
-            <div class="kitchen-table-wrap">
-                <table class="table table-striped table-hover table-dark kitchen-table">
-                    <caption>Tabla de pedidos</caption>
-                    <thead>
-                        <tr>
-                            <th>Nombre del plato</th>
-                            <th>ID del plato</th>
-                            <th>Mesa o destino</th>
-                            <th>Cantidad</th>
-                            <th>Estado</th>
-                            <th>Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody id="pedidosCocinaBody">
-                        <tr>
-                            <td colspan="6">Cargando pedidos...</td>
-                        </tr>
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <th colspan="3">Total: </th>
-                            <th id="totalItemsCocina">0</th>
-                            <th colspan="2"></th>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-        </section>
 
-        <section class="kitchen-section">
-            <h2 class="kitchen-section-title">Especificaciones</h2>
-            <div class="kitchen-table-wrap">
-                <table class="table table-striped table-hover table-danger kitchen-table spec-table">
-                    <caption>Tabla de especificaciones</caption>
-                    <thead>
-                        <tr>
-                            <th>Número de mesa</th>
-                            <th>ID empleado</th>
-                            <th>Detalles extra</th>
-                            <th>Total de pedidos</th>
-                        </tr>
-                    </thead>
-                    <tbody id="pedidosDetalleBody">
-                        <tr>
-                            <td colspan="4">Cargando especificaciones...</td>
-                        </tr>
-                    </tbody>
-                    <tfoot>
-                        <tr>
+        <div class="refresh-bar">
+            <h4 class="m-0" style="color:#1b3a57;">🍳 Vista de Cocina</h4>
+            <button class="btn btn-sm btn-outline-secondary" id="btnRefresh">↺ Actualizar</button>
+            <span id="ultimaActualizacion">–</span>
+            <span class="ms-auto">
+                <span class="badge bg-warning text-dark me-1">● Preparando</span>
+                <span class="badge bg-success me-1">● Listo</span>
+                <span class="badge bg-primary">● Entregado</span>
+            </span>
+        </div>
 
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-        </section>
+        <div id="mesasContainer"></div>
+
+        <div id="sinPedidos" class="text-center text-muted py-5">
+            <p style="font-size:1.2rem;">✅ No hay pedidos activos en este momento.</p>
+        </div>
 
     </main>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
-        crossorigin="anonymous"></script>
-    <script>
-        const PEDIDOS_API_URL = "http://localhost:8080/api/pedidos";
-        const pedidosCocinaBody = document.getElementById("pedidosCocinaBody");
-        const pedidosDetalleBody = document.getElementById("pedidosDetalleBody");
-        const totalItemsCocina = document.getElementById("totalItemsCocina");
-        let pedidosEnProceso = false;
 
-        const getDestinoPedido = (pedido) => {
-            if (pedido.tipo === "delivery") {
-                return pedido.direccionDelivery || "Delivery";
-            }
-            return pedido.mesaCodigo || `Mesa ${pedido.mesaId || "-"}`;
-        };
-
-        const renderPedidos = (pedidos) => {
-            const pedidosActivos = pedidos.filter((pedido) =>
-                !["cancelado", "facturado", "entregado"].includes(pedido.estado)
-            );
-            const detalles = pedidosActivos.flatMap((pedido) =>
-                (pedido.detalles || []).map((detalle) => ({ pedido, detalle }))
-            );
-
-            if (detalles.length === 0) {
-                pedidosCocinaBody.innerHTML = '<tr><td colspan="6">No hay pedidos pendientes.</td></tr>';
-                pedidosDetalleBody.innerHTML = '<tr><td colspan="4">Sin especificaciones pendientes.</td></tr>';
-                totalItemsCocina.textContent = "0";
-                return;
-            }
-
-            pedidosCocinaBody.innerHTML = detalles.map(({ pedido, detalle }) => `
-                <tr>
-                    <td>${detalle.productoNombre}</td>
-                    <td>${detalle.productoId}</td>
-                    <td>${getDestinoPedido(pedido)}</td>
-                    <td>${detalle.cantidad}</td>
-                    <td>${pedido.estado}</td>
-                    <td>
-                        <div class="kitchen-actions">
-                            <button class="btn btn-warning" type="button" data-pedido-id="${pedido.id}" data-estado="en_preparacion">Preparar</button>
-                            <button class="btn btn-success" type="button" data-pedido-id="${pedido.id}" data-estado="listo">Listo</button>
-                            <button class="btn btn-primary" type="button" data-pedido-id="${pedido.id}" data-estado="entregado">Entregado</button>
-                        </div>
-                    </td>
-                </tr>
-            `).join("");
-
-            pedidosDetalleBody.innerHTML = pedidosActivos.map((pedido) => `
-                <tr>
-                    <td>${pedido.mesaCodigo || "-"}</td>
-                    <td>${pedido.id}</td>
-                    <td>${pedido.tipo === "delivery" ? pedido.direccionDelivery : pedido.estado}</td>
-                    <td>${(pedido.detalles || []).reduce((sum, item) => sum + item.cantidad, 0)}</td>
-                </tr>
-            `).join("");
-
-            totalItemsCocina.textContent = detalles.reduce((sum, item) => sum + item.detalle.cantidad, 0);
-        };
-
-        const cargarPedidosCocina = async (forzar = false) => {
-            if (pedidosEnProceso && !forzar) return;
-            try {
-                const response = await fetch(PEDIDOS_API_URL);
-                if (!response.ok) throw new Error("No se pudieron cargar los pedidos.");
-                renderPedidos(await response.json());
-            } catch (error) {
-                pedidosCocinaBody.innerHTML = `<tr><td colspan="6">${error.message}</td></tr>`;
-                pedidosDetalleBody.innerHTML = '<tr><td colspan="4">Verifica que el backend esté encendido.</td></tr>';
-            }
-        };
-
-        pedidosCocinaBody.addEventListener("click", async (event) => {
-            const button = event.target.closest("button[data-pedido-id][data-estado]");
-            if (!button || pedidosEnProceso) return;
-
-            pedidosEnProceso = true;
-            button.disabled = true;
-            const originalText = button.textContent;
-            button.textContent = "...";
-
-            try {
-                const response = await fetch(`${PEDIDOS_API_URL}/${button.dataset.pedidoId}/estado`, {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ estado: button.dataset.estado })
-                });
-
-                if (!response.ok) {
-                    const message = await response.text();
-                    throw new Error(message || "No se pudo actualizar el pedido.");
-                }
-
-                await cargarPedidosCocina(true);
-            } catch (error) {
-                alert(error.message);
-                button.disabled = false;
-                button.textContent = originalText;
-            } finally {
-                pedidosEnProceso = false;
-            }
-        });
-
-        cargarPedidosCocina();
-        setInterval(cargarPedidosCocina, 10000);
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../JS/GestionCocina.js"></script>
 </body>
-
 </html>

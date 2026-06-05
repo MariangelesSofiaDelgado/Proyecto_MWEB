@@ -161,8 +161,8 @@ const updateCartUI = () => {
             const listItem = document.createElement("li");
             listItem.className = "d-flex justify-content-between align-items-center mb-2";
             listItem.innerHTML = `
-                <span>${item.name}</span>
-                <strong class="menu-price">${formatter.format(item.price)}</strong>
+                <span>${item.name} <span class="badge bg-secondary">×${item.quantity}</span></span>
+                <strong class="menu-price">${formatter.format(item.price * item.quantity)}</strong>
             `;
             cartItemsContainer.appendChild(listItem);
         });
@@ -179,28 +179,48 @@ const renderMenuItems = (categoryKey) => {
     menuItemsContainer.innerHTML = "";
 
     category.items.forEach((item) => {
-        const wrapper = document.createElement("label");
-        wrapper.className = "menu-item";
+        const wrapper = document.createElement("div");
+        wrapper.className = "menu-item d-flex justify-content-between align-items-center";
+
+        const enCarrito = cart.has(item.id);
+        const cantidad  = enCarrito ? cart.get(item.id).quantity : 0;
+
         wrapper.innerHTML = `
-            <div>
-                <h6>${item.name}</h6>
-                <p>${item.description}</p>
+            <div class="me-3">
+                <h6 class="mb-0">${item.name}</h6>
+                <small class="text-muted">${item.description}</small>
             </div>
-            <div class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center gap-2 flex-shrink-0">
                 <span class="menu-price">${formatter.format(item.price)}</span>
-                <input class="form-check-input" type="checkbox" data-item-id="${item.id}">
+                <div class="input-group input-group-sm" style="width:110px;">
+                    <button class="btn btn-outline-secondary btn-qty" data-action="menos" data-item-id="${item.id}" type="button">−</button>
+                    <span class="input-group-text justify-content-center qty-display" style="min-width:36px;">
+                        ${cantidad}
+                    </span>
+                    <button class="btn btn-outline-primary btn-qty" data-action="mas" data-item-id="${item.id}" type="button">+</button>
+                </div>
             </div>
         `;
-        const checkbox = wrapper.querySelector("input");
-        checkbox.checked = cart.has(item.id);
-        checkbox.addEventListener("change", (event) => {
-            if (event.target.checked) {
-                cart.set(item.id, { ...item, quantity: 1 });
-            } else {
-                cart.delete(item.id);
-            }
-            updateCartUI();
+
+        // Delegar eventos en los botones +/−
+        wrapper.querySelectorAll(".btn-qty").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const action  = btn.dataset.action;
+                const current = cart.has(item.id) ? cart.get(item.id).quantity : 0;
+                const next    = action === "mas" ? current + 1 : Math.max(0, current - 1);
+
+                if (next === 0) {
+                    cart.delete(item.id);
+                } else {
+                    cart.set(item.id, { ...item, quantity: next });
+                }
+
+                // Actualiza el display sin rerenderizar todo el modal
+                wrapper.querySelector(".qty-display").textContent = next;
+                updateCartUI();
+            });
         });
+
         menuItemsContainer.appendChild(wrapper);
     });
     menuModal.show();

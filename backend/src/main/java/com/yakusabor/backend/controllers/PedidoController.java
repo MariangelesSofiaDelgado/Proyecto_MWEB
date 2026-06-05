@@ -139,8 +139,7 @@ public class PedidoController {
                     pedidoGuardado.getEstado(),
                     pedidoGuardado.getTotal(),
                     pedidoGuardado.getCreatedAt(),
-                    "Pedido registrado correctamente."
-            );
+                    "Pedido registrado correctamente.");
 
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (IllegalArgumentException e) {
@@ -156,8 +155,7 @@ public class PedidoController {
     @Transactional
     public ResponseEntity<?> actualizarEstado(
             @PathVariable Integer id,
-            @RequestBody ActualizarEstadoPedidoRequest request
-    ) {
+            @RequestBody ActualizarEstadoPedidoRequest request) {
         try {
             Pedido pedido = pedidoRepository.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("El pedido seleccionado no existe."));
@@ -180,6 +178,47 @@ public class PedidoController {
         }
     }
 
+    // ==========================================
+    // NUEVO ENDPOINT INTEGRADO
+    // ==========================================
+    @PutMapping("/{pedidoId}/detalles/{detalleId}/estado")
+    @Transactional
+    public ResponseEntity<?> actualizarEstadoDetalle(
+            @PathVariable Integer pedidoId,
+            @PathVariable Integer detalleId,
+            @RequestBody ActualizarEstadoPedidoRequest request) {
+        try {
+            Pedido pedido = pedidoRepository.findById(pedidoId)
+                    .orElseThrow(() -> new IllegalArgumentException("Pedido no encontrado."));
+
+            PedidoDetalle detalle = pedido.getDetalles().stream()
+                    .filter(d -> d.getId().equals(detalleId))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("Detalle no encontrado."));
+
+            List<String> estadosPermitidos = List.of("pendiente", "en_preparacion", "listo", "entregado");
+            String nuevoEstado = request.getEstado().trim().toLowerCase();
+
+            if (!estadosPermitidos.contains(nuevoEstado)) {
+                return ResponseEntity.badRequest().body("Estado inválido.");
+            }
+
+            detalle.setEstadoDetalle(nuevoEstado);
+            pedidoRepository.save(pedido);
+
+            return ResponseEntity
+                    .ok(Map.of("mensaje", "Estado actualizado", "detalleId", detalleId, "estado", nuevoEstado));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno: " + e.getMessage());
+        }
+    }
+
+    // ==========================================
+    // MÉTODOS PRIVADOS DE UTILIDAD
+    // ==========================================
+
     private String normalizarTipo(String tipoPedido) {
         String tipo = tipoPedido == null ? "presencial" : tipoPedido.trim().toLowerCase();
         if (!"presencial".equals(tipo) && !"delivery".equals(tipo)) {
@@ -196,8 +235,7 @@ public class PedidoController {
                 "listo",
                 "entregado",
                 "facturado",
-                "cancelado"
-        );
+                "cancelado");
 
         if (!estadosPermitidos.contains(estado)) {
             throw new IllegalArgumentException("Estado de pedido inválido.");
@@ -259,8 +297,9 @@ public class PedidoController {
                         detalle.getProducto().getNombre(),
                         detalle.getCantidad(),
                         detalle.getPrecioUnitario(),
-                        detalle.getNotas()
-                ))
+                        detalle.getNotas(),
+                        detalle.getId(),
+                        detalle.getEstadoDetalle()))
                 .toList();
 
         Mesa mesa = pedido.getMesa();
@@ -273,7 +312,6 @@ public class PedidoController {
                 mesa != null ? mesa.getId() : null,
                 mesa != null ? mesa.getCodigo() : null,
                 pedido.getDireccionDelivery(),
-                detalles
-        );
+                detalles);
     }
 }
