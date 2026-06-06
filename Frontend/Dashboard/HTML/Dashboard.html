@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Yaku Sabor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="../CSS/styledash.css?v=2">
+
+
+</head>
+
+<body>
+    <nav class="navbar navbar-expand bg-white shadow-sm py-2">
+        <div class="container-fluid">
+            <div class="ms-auto d-flex align-items-center gap-3">
+                <div class="text-end">
+                    <div class="fw-semibold text-primary" id="dashboardUserName">Usuario</div>
+                    <small class="text-muted" id="dashboardUserRole">Rol</small>
+                </div>
+                <button class="btn btn-outline-danger btn-sm" type="button" id="dashboardLogoutBtn">
+                    Cerrar sesión
+                </button>
+                <a href="#" class="profile-link d-flex align-items-center text-decoration-none">
+                    <img src="../../../img/register2.png" alt="perfil" class="profile-img">
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-wrapper">
+        <div class="dashboard-grid">
+            <aside class="col-left">
+                <div class="restaurant-card p-3">
+                    <div class="restaurant-header">
+                        <img src="../../../img/ICON1.png" alt="icon" class="icon-img">
+                    </div>
+
+                    <div class="left-options mt-3 d-grid gap-2">
+                        <!-- agregar conexion con backend aqui: mostrar módulos permitidos según rol del usuario -->
+                        <a href="Gestion DeSala.html" class="btn-pdf js-dashboard-link" data-title="Gestión de Sala">Gestión de Sala</a>
+                        <a href="GestionDeCocinav2.html" class="btn-pdf js-dashboard-link" data-title="Gestión Cocina">Gestión Cocina</a>
+                        <a href="Tomadepedidoin.html" class="btn-pdf js-dashboard-link" data-title="Toma de Pedido In">Toma de Pedido In</a>
+                        <a href="Tomadepedidoout.html" class="btn-pdf js-dashboard-link" data-title="Toma de Pedido Out">Toma de Pedido Out</a>
+                        <a href="Factura.html" class="btn-pdf js-dashboard-link" data-title="Factura">Factura</a>
+                    </div>
+                </div>
+            </aside>
+
+            <main class="col-right">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                    <h2 class="right-title mb-0">Dashboard</h2>
+                </div>
+
+                <section class="card-panel module-viewer">
+                    <div class="d-flex justify-content-between align-items-center gap-2 mb-3 flex-wrap">
+                        <h3 id="viewer-title" class="h5 mb-0">Gestión de Sala</h3>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a href="ReporteyAnalitica.html" class="btn-pdf js-dashboard-link px-3 py-2" data-title="Reporte y Analítica">Reporte y Analítica</a>
+                            <a href="Flujodeestado.html" class="btn-pdf js-dashboard-link px-3 py-2" data-title="Flujo de Estado">Flujo de Estado</a>
+                        </div>
+                    </div>
+
+                    <div class="w-100">
+                        <iframe
+                            id="dashboard-content-frame"
+                            class="module-frame w-100"
+                            title="Contenido del módulo"
+                            src="Gestion DeSala.html"
+                        ></iframe>
+                    </div>
+
+                    <!-- agregar conexion con backend aqui: cargar alertas/notificaciones del dashboard -->
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
+    <script>
+        const moduleLinks = document.querySelectorAll('.js-dashboard-link');
+        const moduleFrame = document.getElementById('dashboard-content-frame');
+        const viewerTitle = document.getElementById('viewer-title');
+        const dashboardUserName = document.getElementById('dashboardUserName');
+        const dashboardUserRole = document.getElementById('dashboardUserRole');
+        const dashboardLogoutBtn = document.getElementById('dashboardLogoutBtn');
+
+        const token = localStorage.getItem('token');
+        const nombre = localStorage.getItem('nombre');
+        const rol = localStorage.getItem('rol');
+
+        if (!token) {
+            window.location.href = '../../Principal/HTML/index.html';
+        }
+
+        dashboardUserName.textContent = nombre || 'Usuario';
+        dashboardUserRole.textContent = rol || 'Sin rol';
+
+        dashboardLogoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('rol');
+            localStorage.removeItem('nombre');
+            window.location.href = '../../Principal/HTML/index.html';
+        });
+
+        moduleLinks.forEach((link) => {
+            link.addEventListener('click', (event) => {
+                const href = link.getAttribute('href');
+                const title = link.dataset.title || 'Vista del módulo';
+
+                if (!href || href === '#') {
+                    event.preventDefault();
+                    viewerTitle.textContent = `${title} (pendiente)`;
+                    moduleFrame.removeAttribute('src');
+                    moduleFrame.srcdoc = '<div style="font-family: Arial, sans-serif; padding: 24px; color: #1b3a57;"><h4>Módulo pendiente</h4><p>Este botón aún no tiene una vista conectada.</p>';
+                    return;
+                }
+
+                event.preventDefault();
+                viewerTitle.textContent = title;
+                moduleFrame.removeAttribute('srcdoc');
+                moduleFrame.src = href;
+            });
+        });
+    </script>
+</body>
+
+</html>

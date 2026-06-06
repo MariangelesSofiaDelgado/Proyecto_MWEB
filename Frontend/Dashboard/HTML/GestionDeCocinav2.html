@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión Cocina</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../CSS/styledash.css">
+    <style>
+        body { background: transparent; }
+
+        .kitchen-dashboard { padding: 16px; }
+
+        /* Tarjeta por mesa */
+        .mesa-card {
+            background: rgba(255, 255, 255, 0.93);
+            border: 1px solid #dbe3ea;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        .mesa-card-title {
+            color: #1b3a57;
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .mesa-card-title .badge { font-size: 0.75rem; }
+
+        .kitchen-table { margin-bottom: 0; }
+
+        /* Botones de acción */
+        .kitchen-actions { display: flex; flex-wrap: wrap; gap: 5px; }
+        .kitchen-actions .btn { font-size: 0.78rem; padding: 3px 8px; }
+
+        /* Badges de estado por plato */
+        .estado-badge {
+            font-size: 0.78rem;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .estado-pendiente       { background: #f0f0f0; color: #555; }
+        .estado-en_preparacion  { background: #fff3cd; color: #856404; }
+        .estado-listo           { background: #d1e7dd; color: #0f5132; }
+        .estado-entregado       { background: #cfe2ff; color: #084298; }
+
+        /* Barra superior */
+        .refresh-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+        #ultimaActualizacion { font-size: 0.82rem; color: #666; }
+        #sinPedidos { display: none; }
+    </style>
+</head>
+<body>
+    <main class="container-fluid kitchen-dashboard">
+
+        <div class="refresh-bar">
+            <h4 class="m-0" style="color:#1b3a57;">🍳 Vista de Cocina</h4>
+            <button class="btn btn-sm btn-outline-secondary" id="btnRefresh">↺ Actualizar</button>
+            <span id="ultimaActualizacion">–</span>
+            <span class="ms-auto">
+                <span class="badge bg-warning text-dark me-1">● Preparando</span>
+                <span class="badge bg-success me-1">● Listo</span>
+                <span class="badge bg-primary">● Entregado</span>
+            </span>
+        </div>
+
+        <div id="mesasContainer"></div>
+
+        <div id="sinPedidos" class="text-center text-muted py-5">
+            <p style="font-size:1.2rem;">✅ No hay pedidos activos en este momento.</p>
+        </div>
+
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../JS/GestionCocina.js"></script>
+</body>
+</html>
