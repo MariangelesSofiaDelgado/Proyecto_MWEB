@@ -182,7 +182,6 @@ function abrirModalCrear() {
   modalNomEl.value         = "";
   modalDescEl.value        = "";
   modalPrecioEl.value      = "";
-  modalDispEl.checked      = true;
   modalCatEl.selectedIndex = 0;
   ocultarErrorModal();
   modalProd.show();
