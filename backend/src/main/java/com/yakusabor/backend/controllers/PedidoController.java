@@ -1,10 +1,12 @@
 package com.yakusabor.backend.controllers;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,6 +24,7 @@ import com.yakusabor.backend.dto.ActualizarEstadoPedidoRequest;
 import com.yakusabor.backend.dto.PedidoDashboardResponse;
 import com.yakusabor.backend.dto.PedidoDetalleResponse;
 import com.yakusabor.backend.dto.PedidoResponse;
+import com.yakusabor.backend.dto.VentaMeseroResponse;
 import com.yakusabor.backend.models.Mesa;
 import com.yakusabor.backend.models.Pedido;
 import com.yakusabor.backend.models.PedidoDetalle;
@@ -31,6 +34,9 @@ import com.yakusabor.backend.repositories.MesaRepository;
 import com.yakusabor.backend.repositories.PedidoRepository;
 import com.yakusabor.backend.repositories.ProductoRepository;
 import com.yakusabor.backend.repositories.UsuarioRepository;
+import java.time.LocalDateTime;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/pedidos")
@@ -196,7 +202,7 @@ public class PedidoController {
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("Detalle no encontrado."));
 
-            List<String> estadosPermitidos = List.of("pendiente", "en_preparacion", "listo", "entregado");
+            List<String> estadosPermitidos = List.of("pendiente", "en_preparacion", "listo", "entregado", "rechazado");
             String nuevoEstado = request.getEstado().trim().toLowerCase();
 
             if (!estadosPermitidos.contains(nuevoEstado)) {
@@ -204,6 +210,13 @@ public class PedidoController {
             }
 
             detalle.setEstadoDetalle(nuevoEstado);
+
+            if ("rechazado".equals(nuevoEstado) && detalle.getProducto() != null) {
+                Producto producto = detalle.getProducto();
+                producto.setDisponible(false);
+                productoRepository.save(producto);
+            }
+
             pedidoRepository.save(pedido);
 
             return ResponseEntity
@@ -288,6 +301,41 @@ public class PedidoController {
         }
         return null;
     }
+
+    @GetMapping("/reporte-ventas")
+    public List<VentaMeseroResponse> reporteVentas() {
+        return pedidoRepository.findAll().stream()
+                .filter(p -> p.getMesero() != null && !"cancelado".equalsIgnoreCase(p.getEstado()))
+                .collect(Collectors.groupingBy(p -> new MeseroTurnoKey(
+                        p.getMesero().getId(),
+                        p.getMesero().getNombre(),
+                        turnoPara(p.getCreatedAt())), Collectors.counting()))
+                .entrySet().stream()
+                .map(entry -> new VentaMeseroResponse(
+                        entry.getKey().meseroId(),
+                        entry.getKey().meseroNombre(),
+                        entry.getKey().turno(),
+                        entry.getValue()))
+                .sorted(Comparator.comparing(VentaMeseroResponse::meseroNombre)
+                        .thenComparing(VentaMeseroResponse::turno))
+                .toList();
+    }
+
+    private String turnoPara(LocalDateTime fecha) {
+        if (fecha == null) {
+            return "Sin horario";
+        }
+        int hora = fecha.getHour();
+        if (hora >= 6 && hora < 14) {
+            return "Mañana";
+        }
+        if (hora >= 14 && hora < 20) {
+            return "Tarde";
+        }
+        return "Noche";
+    }
+
+    private record MeseroTurnoKey(Integer meseroId, String meseroNombre, String turno) {}
 
     private PedidoDashboardResponse mapPedidoDashboard(Pedido pedido) {
         List<PedidoDetalleResponse> detalles = pedido.getDetalles()

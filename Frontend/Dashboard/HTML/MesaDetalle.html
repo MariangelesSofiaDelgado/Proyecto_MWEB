@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
   <meta charset="UTF-8">
@@ -16,7 +16,7 @@
       <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
         <div>
           <span class="badge bg-light text-dark mb-2">Mesa activa</span>
-          <h2 id="mesa-title" class="mb-2">MESA A1</h2>
+          <h2 id="mesa-title" class="mb-2">Cargando…</h2>
           <p class="mb-0">Selecciona productos por categoría para esta mesa.</p>
         </div>
         <a href="Gestion DeSala.html" class="btn btn-light fw-semibold">Volver</a>
@@ -24,6 +24,7 @@
     </div>
 
     <div class="row g-4 align-items-start">
+      <!-- Ticket -->
       <div class="col-12 col-lg-4">
         <div class="card ticket-card h-100">
           <div class="card-header ticket-header d-flex justify-content-between align-items-center">
@@ -32,7 +33,7 @@
           </div>
           <div class="card-body ticket-body">
             <div class="ticket-meta mb-3">
-              <div><strong>Mesa:</strong> <span id="ticket-mesa">A1</span></div>
+              <div><strong>Mesa:</strong> <span id="ticket-mesa">—</span></div>
               <div><strong>Items:</strong> <span id="ticket-count">0</span></div>
             </div>
             <div id="ticket-empty" class="ticket-empty">No hay productos agregados.</div>
@@ -45,40 +46,16 @@
         </div>
       </div>
 
+      <!-- Categorías + Productos -->
       <div class="col-12 col-lg-8">
         <div class="card category">
-          <div class="card-header category-bar">
-            <button type="button" class="btn category-tab active" data-target="bebidas">Bebidas</button>
-            <button type="button" class="btn category-tab" data-target="entradas">Piqueos y Entradas</button>
-            <button type="button" class="btn category-tab" data-target="fondos">Platos de Fondo</button>
+          <div class="card-header category-bar" id="categoryBar">
+            <span id="productosCargando">
+              <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+              Cargando menú…
+            </span>
           </div>
-
-          <div class="card-body category-body">
-            <!-- agregar conexion con la API de productos aqui: reemplazar botones estáticos por menú real -->
-            <div class="category-panel active" data-category="bebidas">
-              <div class="product-grid">
-                <button type="button" class="btn product-btn" data-name="Gaseosa" data-price="8">Gaseosa <span>S/ 8.00</span></button>
-                <button type="button" class="btn product-btn" data-name="Limonada frozen" data-price="12">Limonada frozen <span>S/ 12.00</span></button>
-                <button type="button" class="btn product-btn" data-name="Chicha morada" data-price="8">Chicha morada <span>S/ 8.00</span></button>
-                <button type="button" class="btn product-btn" data-name="Agua mineral" data-price="6">Agua mineral <span>S/ 6.00</span></button>
-              </div>
-            </div>
-
-            <div class="category-panel" data-category="entradas">
-              <div class="product-grid">
-                <button type="button" class="btn product-btn" data-name="Tequeños artesanales" data-price="18">Tequeños artesanales <span>S/ 18.00</span></button>
-                <button type="button" class="btn product-btn" data-name="Alitas BBQ" data-price="24">Alitas BBQ <span>S/ 24.00</span></button>
-                <button type="button" class="btn product-btn" data-name="Ceviche clásico" data-price="29">Ceviche clásico <span>S/ 29.00</span></button>
-              </div>
-            </div>
-
-            <div class="category-panel" data-category="fondos">
-              <div class="product-grid">
-                <button type="button" class="btn product-btn" data-name="Lomo saltado" data-price="32">Lomo saltado <span>S/ 32.00</span></button>
-                <button type="button" class="btn product-btn" data-name="Pollo a la plancha" data-price="26">Pollo a la plancha <span>S/ 26.00</span></button>
-                <button type="button" class="btn product-btn" data-name="Pasta Alfredo" data-price="28">Pasta Alfredo <span>S/ 28.00</span></button>
-              </div>
-            </div>
+          <div class="card-body category-body" id="categoryBody">
           </div>
         </div>
       </div>
@@ -86,101 +63,180 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-FKyoEForCGlyvwx9Hj09Cyn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+    integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
     crossorigin="anonymous"></script>
   <script>
+    // ── Parámetros de URL ──────────────────────────────
     const params = new URLSearchParams(window.location.search);
-    const mesa = params.get('mesa') || 'A1';
-    const mesaTitle = `MESA ${mesa}`;
-    document.getElementById('mesa-title').textContent = mesaTitle;
-    document.getElementById('ticket-mesa').textContent = mesa;
+    const mesaCod = params.get("mesa") || "—";
+    document.getElementById("mesa-title").textContent = `MESA ${mesaCod}`;
+    document.getElementById("ticket-mesa").textContent = mesaCod;
 
-    const ticketItems = document.getElementById('ticket-items');
-    const ticketEmpty = document.getElementById('ticket-empty');
-    const ticketCount = document.getElementById('ticket-count');
-    const ticketTotal = document.getElementById('ticket-total');
-    const clearTicket = document.getElementById('clear-ticket');
-    const productButtons = document.querySelectorAll('.product-btn');
-    const categoryTabs = document.querySelectorAll('.category-tab');
-    const categoryPanels = document.querySelectorAll('.category-panel');
+    // ── API ────────────────────────────────────────────
+    const API_PRODUCTOS = "http://localhost:8080/api/productos";
 
-    const ticketState = [];
-    // agregar conexion con backend aqui: inicializar ticket con pedido activo de la mesa seleccionada
-
-    function formatCurrency(value) {
-      return `S/ ${value.toFixed(2)}`;
+    function authHeaders() {
+      const token = localStorage.getItem("token");
+      return {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      };
     }
 
-    function renderTicket() {
-      // agregar conexion con backend aqui: refrescar ticket con cambios confirmados por el servidor
-      ticketItems.innerHTML = '';
+    // ── Normalización de categorías ────────────────────
+    function normalizarCategoria(nombre) {
+      const n = (nombre || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
+      if (n.includes("piqueo") || n.includes("entrada")) return "Piqueos y Entradas";
+      if (n.includes("sandwich")) return "Sándwiches";
+      if (n.includes("fondo") || n.includes("plato")) return "Platos de Fondo";
+      if (n.includes("postre")) return "Postres";
+      if (n.includes("bebida")) return "Bebidas";
+      return nombre || "Otros";
+    }
 
-      if (ticketState.length === 0) {
-        ticketEmpty.style.display = 'block';
-        ticketCount.textContent = '0';
-        ticketTotal.textContent = 'S/ 0.00';
+    // ── Ticket ─────────────────────────────────────────
+    const ticketState = new Map(); // id → { nombre, precio, cantidad }
+
+    const fmt = v => `S/ ${Number(v).toFixed(2)}`;
+
+    function renderTicket() {
+      const itemsEl = document.getElementById("ticket-items");
+      const emptyEl = document.getElementById("ticket-empty");
+      const countEl = document.getElementById("ticket-count");
+      const totalEl = document.getElementById("ticket-total");
+
+      itemsEl.innerHTML = "";
+
+      if (!ticketState.size) {
+        emptyEl.style.display = "block";
+        countEl.textContent = "0";
+        totalEl.textContent = "S/ 0.00";
         return;
       }
 
-      ticketEmpty.style.display = 'none';
-      let total = 0;
-      let count = 0;
+      emptyEl.style.display = "none";
+      let total = 0, count = 0;
 
-      ticketState.forEach((item) => {
-        total += item.price * item.quantity;
-        count += item.quantity;
+      ticketState.forEach(item => {
+        total += item.precio * item.cantidad;
+        count += item.cantidad;
 
-        const row = document.createElement('div');
-        row.className = 'ticket-item';
+        const row = document.createElement("div");
+        row.className = "ticket-item";
         row.innerHTML = `
           <div>
-            <div class="ticket-item-name">${item.name}</div>
-            <div class="ticket-item-meta">${formatCurrency(item.price)} x ${item.quantity}</div>
+            <div class="ticket-item-name">${item.nombre}</div>
+            <div class="ticket-item-meta">${fmt(item.precio)} × ${item.cantidad}</div>
           </div>
-          <strong>${formatCurrency(item.price * item.quantity)}</strong>
-        `;
-        ticketItems.appendChild(row);
+          <strong>${fmt(item.precio * item.cantidad)}</strong>`;
+        itemsEl.appendChild(row);
       });
 
-      ticketCount.textContent = String(count);
-      ticketTotal.textContent = formatCurrency(total);
+      countEl.textContent = String(count);
+      totalEl.textContent = fmt(total);
     }
 
-    productButtons.forEach((button) => {
-      button.addEventListener('click', () => {
-        const name = button.dataset.name;
-        const price = Number(button.dataset.price || '0');
-        const existingItem = ticketState.find((item) => item.name === name);
+    // ── Render menú desde API ──────────────────────────
+    async function cargarProductos() {
+      const categoryBar = document.getElementById("categoryBar");
+      const categoryBody = document.getElementById("categoryBody");
 
-        if (existingItem) {
-          existingItem.quantity += 1;
-        } else {
-          ticketState.push({ name, price, quantity: 1 });
+      try {
+        const res = await fetch(API_PRODUCTOS, { headers: authHeaders() });
+        if (!res.ok) throw new Error(`Error ${res.status}`);
+        const productos = await res.json();
+
+        // Agrupar por categoría normalizada
+        const grupos = {};
+        productos.forEach(p => {
+          const cat = normalizarCategoria(p.categoria?.nombre);
+          if (!grupos[cat]) grupos[cat] = [];
+          grupos[cat].push(p);
+        });
+
+        const cats = Object.keys(grupos).sort();
+
+        if (!cats.length) {
+          categoryBar.innerHTML = `<span style="color:#64748b;font-size:.88rem">No hay productos registrados.</span>`;
+          categoryBody.innerHTML = "";
+          return;
         }
 
-        renderTicket();
-      });
-    });
+        // Tabs
+        categoryBar.innerHTML = cats.map((cat, i) => `
+          <button type="button" class="btn category-tab${i === 0 ? " active" : ""}" data-target="${i}">
+            ${cat}
+          </button>`).join("");
 
-    categoryTabs.forEach((tab) => {
-      tab.addEventListener('click', () => {
-        const target = tab.dataset.target;
+        // Paneles
+        categoryBody.innerHTML = cats.map((cat, i) => {
+          const items = grupos[cat];
+          const btns = items.map(p => {
+            const disponible = Boolean(p.disponible);
+            if (disponible) {
+              return `
+                <button type="button" class="btn product-btn"
+                  data-id="${p.id}" data-name="${p.nombre.replace(/"/g, '&quot;')}" data-price="${p.precio}">
+                  ${p.nombre}
+                  <span>${fmt(p.precio)}</span>
+                </button>`;
+            } else {
+              return `
+                <button type="button" class="btn product-btn no-disponible" disabled>
+                  ${p.nombre}
+                  <span>${fmt(p.precio)}</span>
+                  <span class="badge-nodisponible">No disponible</span>
+                </button>`;
+            }
+          }).join("");
 
-        categoryTabs.forEach((item) => item.classList.remove('active'));
-        categoryPanels.forEach((panel) => panel.classList.remove('active'));
+          return `
+            <div class="category-panel${i === 0 ? " active" : ""}" data-panel="${i}">
+              <div class="product-grid">${btns}</div>
+            </div>`;
+        }).join("");
 
-        tab.classList.add('active');
-        document.querySelector(`.category-panel[data-category="${target}"]`)?.classList.add('active');
-      });
-    });
+        // Eventos tabs
+        categoryBar.querySelectorAll(".category-tab").forEach(tab => {
+          tab.addEventListener("click", () => {
+            categoryBar.querySelectorAll(".category-tab").forEach(t => t.classList.remove("active"));
+            categoryBody.querySelectorAll(".category-panel").forEach(p => p.classList.remove("active"));
+            tab.classList.add("active");
+            categoryBody.querySelector(`[data-panel="${tab.dataset.target}"]`)?.classList.add("active");
+          });
+        });
 
-    clearTicket.addEventListener('click', () => {
-      // agregar conexion con backend aqui: limpiar/cancelar pedido en el backend
-      ticketState.length = 0;
+        // Eventos botones de producto (solo los disponibles)
+        categoryBody.querySelectorAll(".product-btn:not(.no-disponible)").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const id = parseInt(btn.dataset.id);
+            const nombre = btn.dataset.name;
+            const precio = parseFloat(btn.dataset.price);
+
+            if (ticketState.has(id)) {
+              ticketState.get(id).cantidad += 1;
+            } else {
+              ticketState.set(id, { nombre, precio, cantidad: 1 });
+            }
+            renderTicket();
+          });
+        });
+
+      } catch (err) {
+        categoryBar.innerHTML = `<span style="color:#dc2626;font-size:.85rem">Error al cargar productos: ${err.message}</span>`;
+        categoryBody.innerHTML = "";
+      }
+    }
+
+    // ── Limpiar ticket ─────────────────────────────────
+    document.getElementById("clear-ticket").addEventListener("click", () => {
+      ticketState.clear();
       renderTicket();
     });
 
+    // ── Init ───────────────────────────────────────────
     renderTicket();
+    cargarProductos();
   </script>
 </body>
 

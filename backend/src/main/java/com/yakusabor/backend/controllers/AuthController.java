@@ -6,11 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import java.security.Principal;
+
 import org.springframework.web.bind.annotation.*;
 
 import com.yakusabor.backend.dto.AuthResponse;
 import com.yakusabor.backend.dto.LoginRequest;
 import com.yakusabor.backend.dto.RegistroRequest;
+import com.yakusabor.backend.dto.UsuarioInfoResponse;
 import com.yakusabor.backend.models.Rol;
 import com.yakusabor.backend.models.Usuario;
 import com.yakusabor.backend.repositories.RolRepository;
@@ -55,6 +58,21 @@ public class AuthController {
         String token = jwtUtil.generarToken(usuario.getEmail(), rolNombre);
 
         return ResponseEntity.ok(new AuthResponse(token, usuario.getNombre(), rolNombre)); // Responde 200 OK
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> me(Principal principal) {
+        if (principal == null || principal.getName() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No autorizado");
+        }
+
+        Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(principal.getName());
+        if (usuarioOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no encontrado");
+        }
+
+        Usuario usuario = usuarioOpt.get();
+        return ResponseEntity.ok(new UsuarioInfoResponse(usuario.getNombre(), usuario.getRol().getNombre()));
     }
 
     // ==========================================

@@ -11,51 +11,393 @@
 </head>
 
 <body>
-  <div class="container my-4">
-    <h2 class="mb-3">Gestión de Mesas</h2>
-    <div class="mb-2">
-      <span class="badge bg-light text-dark">Disponible</span>
-      <span class="badge bg-warning text-dark">Ocupada</span>
-      <span class="badge bg-secondary">Reservada</span>
-      <span class="badge bg-danger">Fuera de Servicio</span>
+<div class="container my-4">
+ 
+  <!-- Encabezado -->
+  <div class="sala-header">
+    <div class="d-flex align-items-center gap-3">
+      <span id="lastUpdate"></span>
+      <button class="btn btn-sm btn-outline-secondary refresh-sala-btn" id="btnRefreshSala">↺ Actualizar</button>
     </div>
-
-    <h4 class="mt-4">INTERIOR</h4>
-    <!-- agregar conexion con backend aqui: listar mesas y estados reales desde la API de sala -->
-    <div class="row g-3">
-      <div class="col-md-3">
-        <div class="card mesa disponible">
-          <div class="card-body">
-            <a href="MesaDetalle.html?mesa=A1" class="btn mesa-link">MESA A1</a>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="card mesa ocupada">
-          <div class="card-body">
-            <a href="MesaDetalle.html?mesa=A2" class="btn mesa-link">MESA A2</a>
-
-          </div>
-        </div>
-      </div>
+  </div>
+ 
+  <!-- Leyenda -->
+  <div class="d-flex flex-wrap gap-2 mb-3">
+    <span class="badge" style="background:#dcfce7;color:#15803d;border:1px solid #4ade80;padding:5px 11px;">● Disponible</span>
+    <span class="badge" style="background:#fef9c3;color:#a16207;border:1px solid #facc15;padding:5px 11px;">● Ocupada</span>
+    <span class="badge" style="background:#e2e8f0;color:#475569;border:1px solid #94a3b8;padding:5px 11px;">● Reservada</span>
+    <span class="badge" style="background:#fee2e2;color:#dc2626;border:1px solid #f87171;padding:5px 11px;">● Fuera de Servicio</span>
+  </div>
+ 
+  <div id="salaContainer">
+    <div class="sala-loading">
+      <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+      Cargando mesas…
     </div>
-
-    <h4 class="mt-4">EXTERIOR</h4>
-    <!-- agregar conexion con este componente aqui: sincronizar cambios de estado de mesa en tiempo real -->
-    <div class="row g-3">
-      <div class="col-md-3">
-        <div class="card mesa reservada">
-          <div class="card-body">
-            <a href="MesaDetalle.html?mesa=C1" class="btn mesa-link">MESA C1</a>
-          </div>
-        </div>
+  </div>
+ 
+</div><!-- /container -->
+ 
+<!-- ── Modal: Enviar a Cocina ──────────────────────── -->
+<div class="modal fade" id="modalCocina" tabindex="-1" aria-labelledby="modalCocinaLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:16px;border:none;box-shadow:0 20px 60px rgba(27,58,87,.18);">
+      <div class="modal-header" style="background:#1b3a57;border-radius:16px 16px 0 0;">
+        <h5 class="modal-title text-white" id="modalCocinaLabel">🍳 Enviar Pedido a Cocina</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-2" style="font-size:.9rem;color:#475569;">
+          Confirmando el envío para: <strong id="cocinaModalMesaNombre">—</strong>
+        </p>
+        <p class="mb-0" style="font-size:.85rem;color:#6b7b8a;">
+          Al confirmar, la mesa pasará a estado <strong>Ocupada</strong> 🟡 y el pedido será notificado a cocina.
+        </p>
+      </div>
+      <div class="modal-footer" style="border-top:1px solid #e2e8f0;">
+        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-sm rounded-pill px-4" id="btnConfirmarCocina"
+          style="background:#1b3a57;color:#fff;font-weight:600;">
+          Confirmar envío
+        </button>
       </div>
     </div>
   </div>
+</div>
+ 
+<!-- ── Modal: Fuera de Servicio ───────────────────── -->
+<div class="modal fade" id="modalFuera" tabindex="-1" aria-labelledby="modalFueraLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:16px;border:none;box-shadow:0 20px 60px rgba(239,68,68,.18);">
+      <div class="modal-header" style="background:#dc2626;border-radius:16px 16px 0 0;">
+        <h5 class="modal-title text-white" id="modalFueraLabel">⛔ Fuera de Servicio</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-2" style="font-size:.9rem;color:#475569;">
+          Mesa afectada: <strong id="fueraModalMesaNombre">—</strong>
+        </p>
+        <p class="mb-0" style="font-size:.85rem;color:#6b7b8a;">
+          La mesa quedará marcada como <strong>Fuera de Servicio</strong> 🔴 y no podrá recibir pedidos ni reservas.
+        </p>
+      </div>
+      <div class="modal-footer" style="border-top:1px solid #e2e8f0;">
+        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger btn-sm rounded-pill px-4" id="btnConfirmarFuera">
+          Confirmar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+ 
+<!-- ── Toast ──────────────────────────────────────── -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:1200">
+  <div id="toastSala" class="toast align-items-center text-white border-0" role="alert" aria-atomic="true"
+    style="border-radius:12px;">
+    <div class="d-flex">
+      <div class="toast-body" id="toastSalaMsg">Acción completada.</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
+ 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+ 
+<script>
+// 
+// CONFIG
+// 
+const API_BASE  = "http://localhost:8080/api";
+const MESAS_URL = `${API_BASE}/mesas/estado`;
+ 
+function authHeaders() {
+  const token = localStorage.getItem("token");
+  return {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {})
+  };
+}
+ 
+// 
+// ESTADO LOCAL
+// 
+let mesasData      = []; 
+let accionPendiente = null; 
+ 
+// ── Bootstrap instances ──
+const modalCocinaEl = document.getElementById("modalCocina");
+const modalFueraEl  = document.getElementById("modalFuera");
+const modalCocina   = new bootstrap.Modal(modalCocinaEl);
+const modalFuera    = new bootstrap.Modal(modalFueraEl);
+const toastEl       = document.getElementById("toastSala");
+const toastBS       = new bootstrap.Toast(toastEl, { delay: 3200 });
+ 
+// ════════════════════════════════════════════════════
+// UTILIDADES
+// ════════════════════════════════════════════════════
+function showToast(msg, color = "#1b3a57") {
+  document.getElementById("toastSalaMsg").textContent = msg;
+  toastEl.style.background = color;
+  toastBS.show();
+}
+ 
+// Normaliza el estado que llega de la API a una de las 4 clases CSS
+function normalizeEstado(raw) {
+  const e = (raw || "").toLowerCase().replace(/\s+/g, "_");
+  if (e === "libre" || e === "disponible")    return "disponible";
+  if (e === "ocupada" || e === "ocupado")     return "ocupada";
+  if (e === "reservada" || e === "reservado") return "reservada";
+  if (e.includes("fuera") || e.includes("servicio")) return "fuera";
+  return "disponible";
+}
+ 
+function etiquetaEstado(estado) {
+  return { disponible:"Disponible", ocupada:"Ocupada", reservada:"Reservada", fuera:"Fuera de Servicio" }[estado] || estado;
+}
+ 
+function claseBadge(estado) {
+  return { disponible:"badge-disponible", ocupada:"badge-ocupada", reservada:"badge-reservada", fuera:"badge-fuera" }[estado] || "badge-disponible";
+}
+ 
+// ════════════════════════════════════════════════════
+// CARGA DESDE API
+// ════════════════════════════════════════════════════
+async function cargarMesas(silencioso = false) {
+  if (!silencioso) {
+    document.getElementById("salaContainer").innerHTML = `
+      <div class="sala-loading">
+        <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+        Cargando mesas…
+      </div>`;
+  }
+ 
+  try {
+    const res = await fetch(MESAS_URL, { headers: authHeaders() });
+    if (!res.ok) throw new Error(`Error ${res.status}`);
+    const data = await res.json();
+    if (!Array.isArray(data) || data.length === 0) throw new Error("Sin datos");
+ 
+    // Preservar cambios de estado local (optimistic update) mientras no se refresque
+    mesasData = data.map(m => {
+      const local = mesasData.find(x => x.id === m.id);
+      return local ? { ...m, _estadoLocal: local._estadoLocal } : m;
+    });
+ 
+  } catch {
+    // Si ya teníamos datos, los conservamos; si no, mostramos error
+    if (mesasData.length === 0) {
+      document.getElementById("salaContainer").innerHTML = `
+        <div class="sala-error">
+          ⚠️ No se pudo conectar con el backend. Verifica que el servidor esté encendido.
+        </div>`;
+      return;
+    }
+  }
+ 
+  renderSala();
+  document.getElementById("lastUpdate").textContent =
+    `Actualizado: ${new Date().toLocaleTimeString("es-PE")}`;
+}
+ 
+// 
+// ACTUALIZAR ESTADO EN BACKEND
+// 
+async function actualizarEstadoMesa(mesaId, nuevoEstado) {
+  // Endpoint PUT /api/mesas/:id/estado  (agrégalo al backend si no existe)
+  // Si no existe en tu backend actual, se hace sólo local con optimistic update.
+  try {
+    const res = await fetch(`${API_BASE}/mesas/${mesaId}/estado`, {
+      method: "PUT",
+      headers: authHeaders(),
+      body: JSON.stringify({ estado: nuevoEstado })
+    });
+    if (!res.ok) throw new Error(`Error ${res.status}`);
+  } catch {
+    // Silencioso: el cambio visual ya se hizo de forma optimista
+  }
+}
+ 
+// 
+// RENDER
+// 
+function renderSala() {
+  const container = document.getElementById("salaContainer");
+ 
+  // Agrupar por ubicación
+  const grupos = {};
+  mesasData.forEach(m => {
+    const ub = (m.ubicacion || "sin ubicación").toLowerCase().trim();
+    if (!grupos[ub]) grupos[ub] = [];
+    grupos[ub].push(m);
+  });
+ 
+  const ordenPreferido = ["interior", "exterior"];
+  const todasUbs = [
+    ...ordenPreferido.filter(u => grupos[u]),
+    ...Object.keys(grupos).filter(u => !ordenPreferido.includes(u))
+  ];
+ 
+  if (todasUbs.length === 0) {
+    container.innerHTML = `<div class="sala-loading">No hay mesas registradas.</div>`;
+    return;
+  }
+ 
+  let html = "";
+  todasUbs.forEach(ub => {
+    const mesas = grupos[ub];
+    const titulo = ub.charAt(0).toUpperCase() + ub.slice(1);
+    html += `<div class="section-title">🪑 ${titulo} <small style="font-weight:400;color:#94a3b8;font-size:.78rem;">(${mesas.length} mesa${mesas.length !== 1 ? "s" : ""})</small></div>`;
+    html += `<div class="row g-3 mb-2">`;
+ 
+    mesas.forEach(mesa => {
+      // El estado local tiene prioridad si existe (optimistic update)
+      const estadoRaw  = mesa._estadoLocal ?? mesa.estado;
+      const estado     = normalizeEstado(estadoRaw);
+      const badge      = claseBadge(estado);
+      const etiq       = etiquetaEstado(estado);
+ 
+      // Qué botones mostrar según estado
+      const puedeIrACocina    = estado === "disponible" || estado === "ocupada";
+      const puedeIrFuera      = estado !== "fuera";
+      const puedeLiberarse    = estado === "fuera" || estado === "ocupada" || estado === "reservada";
+ 
+      html += `
+        <div class="col-6 col-sm-4 col-md-3 col-xl-2" id="mesa-col-${mesa.id}">
+          <div class="card mesa ${estado}">
+            <div class="card-body p-2 d-flex flex-column gap-2">
+ 
+              <!-- Botón principal → MesaDetalle -->
+              <a href="MesaDetalle.html?mesa=${encodeURIComponent(mesa.codigo)}"
+                 class="mesa-link">
+                MESA ${mesa.codigo}
+              </a>
+ 
+              <!-- Badge de estado -->
+              <span class="mesa-estado-badge ${badge}">${etiq}</span>
+ 
+              <!-- Botones de acción -->
+              <div class="mesa-actions">
+                <button class="btn-accion btn-cocina-accion"
+                  data-id="${mesa.id}" data-codigo="${mesa.codigo}" data-tipo="cocina"
+                  ${puedeIrACocina ? "" : "disabled"}
+                  title="${puedeIrACocina ? "Enviar pedido a cocina" : "No disponible en este estado"}">
+                  🍳 Cocina
+                </button>
+                <button class="btn-accion btn-fuera-accion"
+                  data-id="${mesa.id}" data-codigo="${mesa.codigo}" data-tipo="fuera"
+                  ${puedeIrFuera ? "" : "disabled"}
+                  title="${puedeIrFuera ? "Marcar como Fuera de Servicio" : "Ya está fuera de servicio"}">
+                  ⛔ Fuera
+                </button>
+              </div>
+ 
+              ${puedeLiberarse ? `
+              <button class="btn-accion btn-liberar-accion"
+                data-id="${mesa.id}" data-codigo="${mesa.codigo}" data-tipo="liberar"
+                title="Liberar mesa → Disponible">
+                ✅ Liberar mesa
+              </button>` : ""}
+ 
+            </div>
+          </div>
+        </div>`;
+    });
+ 
+    html += `</div>`;
+  });
+ 
+  container.innerHTML = html;
+  bindBotones();
+}
+ 
+// 
+// BIND BOTONES
+// 
+function bindBotones() {
+  document.querySelectorAll(".btn-accion:not([disabled])").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const mesa = { id: parseInt(btn.dataset.id), codigo: btn.dataset.codigo };
+      const tipo = btn.dataset.tipo;
+ 
+      accionPendiente = { tipo, mesa };
+ 
+      if (tipo === "cocina") {
+        document.getElementById("cocinaModalMesaNombre").textContent = `Mesa ${mesa.codigo}`;
+        modalCocina.show();
+      } else if (tipo === "fuera") {
+        document.getElementById("fueraModalMesaNombre").textContent = `Mesa ${mesa.codigo}`;
+        modalFuera.show();
+      } else if (tipo === "liberar") {
+        // Acción directa sin modal
+        aplicarCambioEstado(mesa.id, "libre");
+        showToast(`✅ Mesa ${mesa.codigo} liberada y marcada como Disponible.`, "#16a34a");
+      }
+    });
+  });
+}
+ 
+// 
+// APLICAR CAMBIO DE ESTADO
+// 
+function aplicarCambioEstado(mesaId, nuevoEstadoApi) {
+  const mesa = mesasData.find(m => m.id === mesaId);
+  if (mesa) mesa._estadoLocal = nuevoEstadoApi;
+  renderSala();
+  actualizarEstadoMesa(mesaId, nuevoEstadoApi); // llamada al backend
+}
+ 
+// 
+// CONFIRMAR COCINA
+// 
+document.getElementById("btnConfirmarCocina").addEventListener("click", () => {
+  if (!accionPendiente) return;
+  const { mesa } = accionPendiente;
+ 
+  modalCocina.hide();
+  aplicarCambioEstado(mesa.id, "ocupada");
+  showToast(`🍳 Mesa ${mesa.codigo} enviada a cocina → Ocupada.`, "#ca8a04");
+  accionPendiente = null;
+ 
+  // Refrescar desde el servidor después de 4 s
+  setTimeout(() => cargarMesas(true), 4000);
+});
+ 
+// 
+// CONFIRMAR FUERA DE SERVICIO
+// 
+document.getElementById("btnConfirmarFuera").addEventListener("click", () => {
+  if (!accionPendiente) return;
+  const { mesa } = accionPendiente;
+ 
+  modalFuera.hide();
+  aplicarCambioEstado(mesa.id, "fuera_de_servicio");
+  showToast(`⛔ Mesa ${mesa.codigo} marcada como Fuera de Servicio.`, "#dc2626");
+  accionPendiente = null;
+ 
+  setTimeout(() => cargarMesas(true), 4000);
+});
+ 
+// 
+// ESCUCHAR RESERVAS DESDE PÁGINA PÚBLICA
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
-    crossorigin="anonymous"></script>
+window.addEventListener("message", e => {
+  if (e.data && e.data.type === "reserva_confirmada") {
+    const mesaId = e.data.mesaId;
+    const mesa = mesasData.find(m => m.id === mesaId);
+    if (mesa) mesa._estadoLocal = "reservada";
+    renderSala();
+    showToast(`📅 Mesa reservada desde la página pública.`, "#475569");
+    // Re-sincronizar con el backend
+    setTimeout(() => cargarMesas(true), 3000);
+  }
+});
+ 
+document.getElementById("btnRefreshSala").addEventListener("click", () => cargarMesas(false));
+cargarMesas();
+setInterval(() => cargarMesas(true), 30000);
+</script>
 </body>
 
 </html>
