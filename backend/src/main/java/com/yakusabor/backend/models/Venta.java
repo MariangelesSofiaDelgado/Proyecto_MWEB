@@ -17,8 +17,8 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "facturas")
-public class Factura {
+@Table(name = "ventas")
+public class Venta {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -27,14 +27,15 @@ public class Factura {
     @JoinColumn(name = "pedido_id")
     private Pedido pedido;
 
-    @Column(nullable = false, length = 20)
-    private String tipo = "boleta";
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "mesero_id")
+    private Usuario mesero;
 
-    @Column(length = 20)
-    private String ruc;
+    @Column(length = 30)
+    private String turno;
 
-    @Column(name = "razon_social", length = 150)
-    private String razonSocial;
+    @Column(name = "num_items")
+    private Integer numItems;
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal total;

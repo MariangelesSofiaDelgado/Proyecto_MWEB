@@ -16,8 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.yakusabor.backend.models.Factura;
 import com.yakusabor.backend.models.Pedido;
+import com.yakusabor.backend.models.Venta;
 import com.yakusabor.backend.repositories.FacturaRepository;
 import com.yakusabor.backend.repositories.PedidoRepository;
+import com.yakusabor.backend.repositories.VentaRepository;
 
 @RestController
 @RequestMapping("/api/facturas")
@@ -28,6 +30,9 @@ public class FacturaController {
 
     @Autowired
     private PedidoRepository pedidoRepository;
+
+    @Autowired
+    private VentaRepository ventaRepository;
 
     @GetMapping
     public List<Factura> listar() {
@@ -46,12 +51,42 @@ public class FacturaController {
             Factura f = new Factura();
             f.setPedido(pedido);
             f.setTotal(pedido.getTotal());
+            f.setTipo(String.valueOf(body.getOrDefault("tipo", "boleta")).trim());
+            f.setRuc(String.valueOf(body.getOrDefault("ruc", "")).trim());
+            f.setRazonSocial(String.valueOf(body.getOrDefault("razonSocial", "")).trim());
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(facturaRepository.save(f));
+            Factura facturaGuardada = facturaRepository.save(f);
+
+            Venta venta = new Venta();
+            venta.setPedido(pedido);
+            venta.setMesero(pedido.getMesero());
+            venta.setTotal(pedido.getTotal());
+            venta.setNumItems(pedido.getDetalles().stream().mapToInt(d -> d.getCantidad()).sum());
+            venta.setTurno(determineTurno(pedido.getCreatedAt()));
+            ventaRepository.save(venta);
+
+            pedido.setEstado("facturado");
+            pedidoRepository.save(pedido);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(facturaGuardada);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al crear factura: " + e.getMessage());
         }
+    }
+
+    private String determineTurno(java.time.LocalDateTime fecha) {
+        if (fecha == null) {
+            fecha = java.time.LocalDateTime.now();
+        }
+        int hora = fecha.getHour();
+        if (hora < 14) {
+            return "Mañana";
+        }
+        if (hora < 21) {
+            return "Tarde";
+        }
+        return "Noche";
     }
 
     @GetMapping("/{id}")

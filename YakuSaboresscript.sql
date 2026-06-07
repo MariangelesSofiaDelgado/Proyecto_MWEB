@@ -87,6 +87,18 @@ CREATE TABLE facturas (
     FOREIGN KEY (pedido_id) REFERENCES pedidos(id)
 );
 
+CREATE TABLE ventas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    pedido_id INT NOT NULL,
+    mesero_id INT NULL,
+    turno VARCHAR(30) NOT NULL,
+    num_items INT NOT NULL DEFAULT 0,
+    total DECIMAL(10,2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (pedido_id) REFERENCES pedidos(id),
+    FOREIGN KEY (mesero_id) REFERENCES usuarios(id)
+);
+
 -- ==========================================
 -- 2. DATOS MAESTROS
 -- ==========================================
