@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Ventas — Yaku Sabor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #f4f7fb; color: #1b3a57; }
+        .page-header { display:flex; align-items:center; justify-content:space-between; margin:1.5rem 0; }
+        .report-card { background:#fff; border-radius:16px; padding:1.5rem; box-shadow:0 10px 30px rgba(0,0,0,.06); }
+        .table-responsive { margin-top:1rem; }
+        .status-text { margin-top:1rem; color:#6b7b8f; }
+    </style>
+</head>
+
+<body>
+    <main class="container py-4">
+        <div class="page-header">
+            <div>
+                <h2>Reporte de Ventas</h2>
+                <p class="text-muted">Lista de ventas por mesero, turno y cantidad de pedidos.</p>
+            </div>
+            <button id="btnReloadReport" class="btn btn-primary">Actualizar</button>
+        </div>
+
+        <section class="report-card">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Mesero</th>
+                            <th>Turno</th>
+                            <th class="text-end">Ventas</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportTableBody">
+                        <tr>
+                            <td colspan="3" class="text-center py-4">Cargando reporte…</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="reportStatus" class="status-text"></div>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../JS/ReporteVentas.js"></script>
+</body>
+
+</html>
