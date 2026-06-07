@@ -66,6 +66,7 @@ body {
     transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
     box-shadow: none;
 }
+
 .left-options .btn-pdf:hover {
     background-color: rgba(245, 245, 245, 0.96);
     color: #1b3a57;
@@ -164,12 +165,8 @@ body {
     box-shadow: 0 10px 22px rgba(0, 0, 0, 0.04);
 }
 
-/*STYLOS DE LAS MESAS*/
 
-.mesa-icon {
-    font-size: 1.05rem;
-    color: #1b3a57;
-}
+
 
 .mesa-link {
     display: inline-flex;
@@ -479,4 +476,243 @@ body {
     font-size: 0.95rem;
     font-weight: 600;
     padding: 0.55em 0.90em;
+}
+
+.product-btn.no-disponible {
+    background: #fef2f2;
+    border-color: #fca5a5;
+    color: #9ca3af;
+    cursor: not-allowed;
+    opacity: .75;
+}
+
+.product-btn.no-disponible span {
+    color: #ef4444;
+}
+
+.product-btn.no-disponible .badge-nodisponible {
+    display: inline-block;
+    font-size: .68rem;
+    background: #fee2e2;
+    color: #dc2626;
+    border-radius: 999px;
+    padding: 1px 7px;
+    font-weight: 700;
+    margin-top: 2px;
+}
+
+.product-btn.no-disponible:hover {
+    transform: none;
+    box-shadow: none;
+    border-color: #fca5a5;
+    background: #fef2f2;
+}
+
+/* Pestaña de categoría vacía */
+.category-tab.sin-items {
+    opacity: .45;
+    cursor: default;
+}
+
+#productosCargando {
+    color: #64748b;
+    font-size: .88rem;
+    padding: 20px;
+    text-align: center;
+}
+
+.sala-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+#lastUpdate {
+    font-size: .75rem;
+    color: #94a3b8;
+}
+
+.refresh-sala-btn {
+    font-size: .8rem;
+    border-radius: 999px;
+    padding: 4px 14px;
+}
+
+.section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1b3a57;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 22px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+/* ── Tarjeta de mesa ─────────────────────────── */
+.card.mesa {
+    border-radius: 14px;
+    border: 2px solid;
+    overflow: hidden;
+}
+
+/* DISPONIBLE → verde */
+.card.mesa.disponible {
+    background: #f0fdf4;
+    border-color: #4ade80;
+}
+
+/* OCUPADA → amarillo */
+.card.mesa.ocupada {
+    background: #fefce8;
+    border-color: #facc15;
+}
+
+/* RESERVADA → gris */
+.card.mesa.reservada {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+}
+
+/* FUERA DE SERVICIO → rojo */
+.card.mesa.fuera {
+    background: #fff1f2;
+    border-color: #f87171;
+}
+
+/* ── Mesa link (botón principal) ─────────────── */
+.mesa-link {
+    font-weight: 700;
+    font-size: .88rem;
+    letter-spacing: .04em;
+    border-radius: 9px;
+    padding: 10px 6px;
+    text-align: center;
+    display: block;
+    text-decoration: none;
+    color: #fff;
+}
+
+.disponible .mesa-link {
+    background: #16a34a;
+}
+
+.ocupada .mesa-link {
+    background: #ca8a04;
+}
+
+.reservada .mesa-link {
+    background: #64748b;
+}
+
+.fuera .mesa-link {
+    background: #dc2626;
+    pointer-events: none;
+    opacity: .75;
+}
+
+/* ── Badge estado ────────────────────────────── */
+.mesa-estado-badge {
+    font-size: .65rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+    display: inline-block;
+    text-align: center;
+}
+
+.badge-disponible {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.badge-ocupada {
+    background: #fef9c3;
+    color: #a16207;
+}
+
+.badge-reservada {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+.badge-fuera {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+/* ── Botones acción (fila inferior) ──────────── */
+.mesa-actions {
+    display: flex;
+    gap: 5px;
+    margin-top: 4px;
+}
+
+.btn-accion {
+    flex: 1;
+    font-size: .68rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    padding: 5px 4px;
+    cursor: pointer;
+    transition: background .18s, opacity .18s;
+    white-space: nowrap;
+}
+
+.btn-accion:disabled {
+    opacity: .38;
+    cursor: not-allowed;
+}
+
+/* Cocina */
+.btn-cocina-accion {
+    background: #1b3a57;
+    color: #fff;
+}
+
+.btn-cocina-accion:hover:not(:disabled) {
+    background: #2f5b84;
+}
+
+/* Fuera de servicio */
+.btn-fuera-accion {
+    background: #ef4444;
+    color: #fff;
+}
+
+.btn-fuera-accion:hover:not(:disabled) {
+    background: #b91c1c;
+}
+
+/* Liberar (volver a disponible) */
+.btn-liberar-accion {
+    background: #16a34a;
+    color: #fff;
+}
+
+.btn-liberar-accion:hover:not(:disabled) {
+    background: #15803d;
+}
+
+/* ── Sala loading / error ────────────────────── */
+.sala-loading {
+    text-align: center;
+    padding: 40px;
+    color: #8fa3b0;
+    font-size: .9rem;
+}
+
+.sala-error {
+    background: #fff1f2;
+    border: 1px solid #fca5a5;
+    border-radius: 10px;
+    padding: 14px 18px;
+    color: #dc2626;
+    font-size: .88rem;
+    margin: 12px 0;
 }

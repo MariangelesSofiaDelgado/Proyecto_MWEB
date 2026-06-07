@@ -46,7 +46,7 @@ const normalizeMesasEstado = (payload) => {
 const fetchMesasEstado = async () => {
     const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.estadoMesasPath}`, {
         method: "GET",
-        headers: authHeaders() // <--- INTEGRADO AQUÍ 
+        headers: authHeaders()
     });
     if (!response.ok) {
         throw new Error("No se pudo obtener el estado de las mesas.");
@@ -58,7 +58,7 @@ const fetchMesasEstado = async () => {
 const enviarReserva = async (mesaId) => {
     const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.reservarPath}`, {
         method: "POST",
-        headers: authHeaders(), // <--- INTEGRADO AQUÍ (Protege la creación de la reserva)
+        headers: authHeaders(),
         body: JSON.stringify({ mesaId })
     });
 
@@ -134,11 +134,28 @@ const cargarEstadoMesas = async () => {
     renderMesas();
 };
 
+// ── Notificar a Gestión de Sala cuando se confirme una reserva ──
+// Si la página está dentro del iframe del Dashboard, notifica al padre.
+// Si está abierta directamente, notifica a cualquier ventana del mismo origen.
+function notificarReservaConfirmada(mesaId) {
+    const msg = { type: "reserva_confirmada", mesaId };
+
+    // Caso 1: estamos dentro del iframe del Dashboard
+    if (window.parent && window.parent !== window) {
+        window.parent.postMessage(msg, "*");
+    }
+
+    // Caso 2: notificar a iframes que tengan Gestión de Sala cargada
+    // (El Dashboard carga los módulos en un iframe; el padre los recibe y los reenvía)
+    try {
+        window.top.postMessage(msg, "*");
+    } catch (_) { /* cross-origin; ignorar */ }
+}
+
 if (reservaModal && mesasGrid && mesaSeleccionadaTexto && confirmarReservaBtn) {
     reservaModal.addEventListener("show.bs.modal", cargarEstadoMesas);
 
     confirmarReservaBtn.addEventListener("click", async () => {
-        // Verificar si el usuario está logueado antes de intentar enviar
         const token = localStorage.getItem("token");
         if (!token) {
             mostrarFeedback("Debes iniciar sesión para realizar una reserva.", "warning");
@@ -152,10 +169,17 @@ if (reservaModal && mesasGrid && mesaSeleccionadaTexto && confirmarReservaBtn) {
         try {
             await enviarReserva(mesaSeleccionada);
             mostrarFeedback(`Reserva confirmada para la mesa ${mesaSeleccionada}.`, "success");
+
+            // Actualizar estado local de la mesa
             const mesaActual = mesasEstado.find((mesa) => mesa.id === mesaSeleccionada);
             if (mesaActual) {
-                mesaActual.libre = false;
+                mesaActual.libre  = false;
+                mesaActual.estado = "reservada";
             }
+
+            // Notificar a Gestión de Sala para que refresque
+            notificarReservaConfirmada(mesaSeleccionada);
+
             mesaSeleccionada = null;
             renderMesas();
         } catch (error) {
