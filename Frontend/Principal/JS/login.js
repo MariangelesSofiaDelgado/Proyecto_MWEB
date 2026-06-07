@@ -127,6 +127,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     localStorage.setItem("token", data.token);
                     localStorage.setItem("rol", data.rol);
                     localStorage.setItem("nombre", data.nombre);
+                    if (data.id) localStorage.setItem("userId", String(data.id));
                     setupPublicSessionUI();
 
                     alert(`¡Bienvenido/a, ${data.nombre}!`);

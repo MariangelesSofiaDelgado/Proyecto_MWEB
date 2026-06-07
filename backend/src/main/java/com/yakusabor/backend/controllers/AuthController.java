@@ -57,7 +57,7 @@ public class AuthController {
         // Generamos el token JWT real
         String token = jwtUtil.generarToken(usuario.getEmail(), rolNombre);
 
-        return ResponseEntity.ok(new AuthResponse(token, usuario.getNombre(), rolNombre)); // Responde 200 OK
+        return ResponseEntity.ok(new AuthResponse(token, usuario.getNombre(), rolNombre, usuario.getId())); // Responde 200 OK
     }
 
     @GetMapping("/me")

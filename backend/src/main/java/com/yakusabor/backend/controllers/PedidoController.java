@@ -131,6 +131,8 @@ public class PedidoController {
                 detalle.setCantidad(cantidad);
                 detalle.setPrecioUnitario(precioUnitario);
                 detalle.setNotas(getString(itemRequest, "notas"));
+                // Estado inicial del detalle: pendiente
+                detalle.setEstadoDetalle("pendiente");
                 pedido.agregarDetalle(detalle);
 
                 totalCalculado = totalCalculado.add(precioUnitario.multiply(BigDecimal.valueOf(cantidad)));

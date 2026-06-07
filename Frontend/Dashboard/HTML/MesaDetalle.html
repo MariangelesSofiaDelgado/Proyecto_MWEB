@@ -19,7 +19,11 @@
           <h2 id="mesa-title" class="mb-2">Cargando…</h2>
           <p class="mb-0">Selecciona productos por categoría para esta mesa.</p>
         </div>
-        <a href="Gestion DeSala.html" class="btn btn-light fw-semibold">Volver</a>
+        <div>
+          <button id="btnSaveDraft" class="btn btn-outline-primary me-2">Guardar selección</button>
+          <button id="btnSendToKitchen" class="btn btn-primary me-2">Enviar a cocina</button>
+          <a href="Gestion DeSala.html" class="btn btn-light fw-semibold">Volver</a>
+        </div>
       </div>
     </div>
 
@@ -232,6 +236,49 @@
     document.getElementById("clear-ticket").addEventListener("click", () => {
       ticketState.clear();
       renderTicket();
+    });
+
+    // ── Guardar borrador en localStorage ────────────────
+    document.getElementById("btnSaveDraft").addEventListener("click", () => {
+      const mesa = mesaCod;
+      const items = Array.from(ticketState.entries()).map(([id, v]) => ({ productoId: id, cantidad: v.cantidad, precioUnitario: v.precio }));
+      if (!items.length) { alert('No hay items para guardar.'); return; }
+      const key = `draft_ticket_${mesa}`;
+      localStorage.setItem(key, JSON.stringify({ mesa, items, savedAt: new Date().toISOString() }));
+      alert('Selección guardada localmente. Puedes enviarla luego desde la gestión de sala.');
+    });
+
+    // ── Enviar a cocina (crear pedido en backend)
+    document.getElementById("btnSendToKitchen").addEventListener("click", async () => {
+      const items = Array.from(ticketState.entries()).map(([id, v]) => ({ productoId: id, cantidad: v.cantidad, precioUnitario: v.precio }));
+      if (!items.length) { alert('No hay items para enviar.'); return; }
+
+      try {
+        // Obtener mesa id desde /api/mesas/estado
+        const mesasRes = await fetch('http://localhost:8080/api/mesas/estado', { headers: authHeaders() });
+        if (!mesasRes.ok) throw new Error('No se pudo obtener mesas');
+        const mesas = await mesasRes.json();
+        const mesaObj = mesas.find(m => m.codigo === mesaCod || String(m.codigo) === mesaCod);
+        if (!mesaObj) { alert('No se encontró la mesa en el sistema.'); return; }
+
+        const payload = {
+          tipoPedido: 'presencial',
+          mesaId: mesaObj.id,
+          meseroId: localStorage.getItem('userId') ? parseInt(localStorage.getItem('userId')) : null,
+          items
+        };
+
+        const res = await fetch('http://localhost:8080/api/pedidos', { method: 'POST', headers: authHeaders(), body: JSON.stringify(payload) });
+        if (!res.ok) {
+          const err = await res.text();
+          throw new Error(err || `Error ${res.status}`);
+        }
+        const data = await res.json();
+        alert('Pedido enviado a cocina. ID: ' + data.id);
+        ticketState.clear(); renderTicket();
+      } catch (err) {
+        alert('Error al enviar: ' + err.message);
+      }
     });
 
     // ── Init ───────────────────────────────────────────

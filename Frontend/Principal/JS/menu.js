@@ -299,6 +299,12 @@ if (confirmCheckoutBtn) {
             }
         }
 
+        // Preguntar si desea agregar detalles adicionales (alergias, observaciones)
+        let notasGenerales = "";
+        if (confirm("¿Deseas agregar algún detalle adicional al pedido (ej. alergias)?")) {
+            notasGenerales = prompt("Ingresa observaciones o alergias (se aplicarán a todos los ítems):", "") || "";
+        }
+
         const payload = {
             tipoPedido: tipo,
             mesaId: mesaId ? parseInt(mesaId) : null,
@@ -310,6 +316,10 @@ if (confirmCheckoutBtn) {
             })),
             total: calculateCartTotal()
         };
+        // Si hay notas generales, anexarlas a cada item como 'notas'
+        if (notasGenerales) {
+            payload.items = payload.items.map(it => ({ ...it, notas: notasGenerales }));
+        }
 
         confirmCheckoutBtn.disabled = true;
         confirmCheckoutBtn.textContent = "Registrando...";
