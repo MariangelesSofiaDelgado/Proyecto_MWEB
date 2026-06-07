@@ -1,98 +1,142 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <title>Toma de Pedido (Out) - Entrega</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../CSS/styledash.css">
     <style>
-.btn-group{
-    gap: 10px;
-}
+        body { background: transparent; }
+
+        .kitchen-dashboard {
+            padding: 20px;
+        }
+
+        .mesa-card {
+            background: rgba(255, 255, 255, 0.93);
+            border: 1px solid #dbe3ea;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .mesa-card-title {
+            color: #1b3a57;
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mesa-card-title .badge {
+            font-size: 0.75rem;
+        }
+
+        .kitchen-table {
+            margin-bottom: 0;
+        }
+
+        .kitchen-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .kitchen-actions .btn {
+            font-size: 0.78rem;
+            padding: 3px 8px;
+        }
+
+        .estado-badge {
+            font-size: 0.78rem;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .estado-pendiente {
+            background: #f0f0f0;
+            color: #555;
+        }
+
+        .estado-en_preparacion {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .estado-listo {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .estado-entregado {
+            background: #cfe2ff;
+            color: #084298;
+        }
+
+        .refresh-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+
+        #ultimaActualizacion {
+            font-size: 0.82rem;
+            color: #666;
+        }
+
+        #sinPedidos {
+            display: none;
+        }
+
+        .btn-action-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: #1b3a57;
+            color: #fff;
+            border: none;
+            border-radius: 999px;
+            padding: 7px 18px;
+            font-size: .85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background .2s, transform .15s;
+            letter-spacing: .02em;
+        }
+
+        .btn-action-primary:hover {
+            background: #2f5b84;
+            transform: translateY(-1px);
+            color: #fff;
+        }
+
+        .total-amount {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1b3a57;
+        }
     </style>
 </head>
-
 <body>
-    <table class="table table-striped table-hover table-bordered">
-        <caption>Tabla de informacion</caption>
-        <thead class="table-danger">
-            <tr>
-                <th>Estado del pedido</th>
-                <th>Envio del pedido</th>
-            </tr>
-        </thead>
-        <!-- agregar conexion con backend aqui: cargar pedidos para llevar y sus estados -->
-        <tbody class="table-secondary">
-            <tr>
-                <td>-->Estado</td>
-                <td>
-                    <label>+Nombre del plato</label>
-                    <br>
-                    <input type="text">
-                </td>
+    <main class="container-fluid kitchen-dashboard">
+        <div class="refresh-bar">
+            <button class="btn-action-primary" id="btnRefresh">↺ Actualizar</button>
+            <span id="ultimaActualizacion">–</span>
+        </div>
 
-            </tr>
-            <tr>
-                <td></td>
-                <td>
-                    <label>+ID del plato</label>
-                    <br>
-                    <input type="text">
-                </td>
-            </tr>
-            <tr>
-                <td>
+        <div id="mesasContainer">Cargando pedidos…</div>
 
-                </td>
-                <td>
-                    <label>+Mesa a la que pertenece</label>
-                    <!-- agregar conexion con la API de mesas aqui: reemplazar opciones fijas por catálogo real -->
-                    <select>
-                        <option>1</option>
-                        <option>2</option>
-                        <option>3</option>
-                        <option>4</option>
-                        <option>5</option>
-                        <option>6</option>
-                        <option>7</option>
-                        <option>8</option>
-                        <option>9</option>
-                        <option>10</option>
-                        <option>11</option>
-                        <option>12</option>
-                        <option>13</option>
-                        <option>14</option>
-                        <option>15</option>
-                        <option>16</option>
-                        <option>17</option>
-                        <option>18</option>
-                        <option>19</option>
-                        <option>20</option>
-
-                    </select>
-                </td>
-            </tr>
-        </tbody>
-        <tfoot class="table-primary">
-            <th></th>
-            <th>
-                <div class="btn-group">
-                    <!-- agregar conexion con backend aqui: persistir acciones de borrar/enviar pedido -->
-                    <button class="btn btn-warning">Borrar</button>
-                    
-                    <button class="btn btn-success">Enviar</button>
-                </div>
-            </th>
-        </tfoot>
-    </table>
-
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
-        crossorigin="anonymous"></script>
+        <div id="sinPedidos" class="text-center text-muted py-5">
+            <p style="font-size:1.2rem;">✅ No hay pedidos listos para entregar en este momento.</p>
+        </div>
+    </main>
+    <script src="../JS/Tomadepedidoout.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>

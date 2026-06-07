@@ -1,4 +1,5 @@
 const ORDERS_API = 'http://localhost:8080/api/pedidos';
+const INVOICES_API = 'http://localhost:8080/api/facturas';
 
 function authHeaders() {
   const token = localStorage.getItem('token');
@@ -14,7 +15,7 @@ function estadoClass(s) {
   return `estado-${s.replace(' ', '_')}`;
 }
 
-async function loadPedidos() {
+async function loadReadyOrders() {
   const container = document.getElementById('mesasContainer');
   const sinPedidos = document.getElementById('sinPedidos');
   
@@ -23,7 +24,12 @@ async function loadPedidos() {
     if (!res.ok) throw new Error('Error ' + res.status);
     const pedidos = await res.json();
 
-    if (!pedidos.length) { 
+    // Filter orders that are ready or in preparation
+    const readyOrders = pedidos.filter(p => 
+      ['en_preparacion', 'listo', 'entregado', 'facturado'].includes(p.estado)
+    );
+
+    if (!readyOrders.length) { 
       container.innerHTML = '';
       sinPedidos.style.display = 'block';
       return; 
@@ -33,36 +39,43 @@ async function loadPedidos() {
 
     // Agrupar por mesa
     const porMesa = {};
-    pedidos.forEach(p => {
+    readyOrders.forEach(p => {
       const key = p.mesaCodigo || 'SIN MESA';
       if (!porMesa[key]) porMesa[key] = [];
       porMesa[key].push(p);
     });
 
     container.innerHTML = Object.entries(porMesa).map(([mesaCod, pedidosMesa]) => {
-      const detallesHTML = pedidosMesa.flatMap(p => 
-        (p.detalles || []).map(d => `
+      const detallesHTML = pedidosMesa.flatMap(p => {
+        const todosListos = (p.detalles || []).every(d => 
+          ['listo', 'entregado', 'rechazado'].includes(d.estadoDetalle)
+        );
+
+        return (p.detalles || []).map(d => `
           <tr>
             <td>${d.productoNombre}</td>
             <td class="text-center">${d.cantidad}</td>
             <td><span class="estado-badge ${estadoClass(d.estadoDetalle)}">${estadoLabel(d.estadoDetalle)}</span></td>
             <td class="text-end">
               <div class="kitchen-actions">
-                ${d.estadoDetalle !== 'en_preparacion' && d.estadoDetalle !== 'listo' && d.estadoDetalle !== 'rechazado' ? 
-                  `<button class="btn btn-sm btn-secondary btn-send" data-pedido="${p.id}" data-detalle="${d.detalleId}">→ Cocina</button>` : ''}
-                ${d.estadoDetalle === 'listo' ? 
-                  `<button class="btn btn-sm btn-success btn-ready" data-pedido="${p.id}" data-detalle="${d.detalleId}">✓ Listo</button>` : ''}
+                ${todosListos && p.estado === 'en_preparacion' ? 
+                  `<button class="btn btn-sm btn-success btn-generate-invoice" data-pedido="${p.id}" data-total="${p.total}">🧾 Generar Factura</button>` : 
+                  p.estado === 'facturado' ? 
+                  `<span class="badge bg-info">Facturado</span>` : ''}
               </div>
             </td>
           </tr>
-        `)
-      ).join('');
+        `);
+      }).join('');
+
+      const totalPedidos = pedidosMesa.reduce((sum, p) => sum + parseFloat(p.total || 0), 0).toFixed(2);
 
       return `
         <div class="mesa-card">
           <div class="mesa-card-title">
             <span>Mesa ${mesaCod}</span>
-            <span class="badge bg-secondary">${pedidosMesa.length} pedido(s)</span>
+            <span class="badge bg-info">${pedidosMesa.length} pedido(s)</span>
+            <span class="total-amount">S/. ${totalPedidos}</span>
           </div>
           <div class="table-responsive">
             <table class="table table-sm kitchen-table">
@@ -74,39 +87,38 @@ async function loadPedidos() {
       `;
     }).join('');
 
-    // Attach event listeners
-    document.querySelectorAll('.btn-send').forEach(btn => {
+    // Attach event listeners for invoice generation
+    document.querySelectorAll('.btn-generate-invoice').forEach(btn => {
       btn.addEventListener('click', async () => {
         const pedidoId = btn.dataset.pedido;
-        const detalleId = btn.dataset.detalle;
+        const total = btn.dataset.total;
+        
         try {
-          const res = await fetch(`${ORDERS_API}/${pedidoId}/detalles/${detalleId}/estado`, { 
-            method: 'PUT', 
-            headers: authHeaders(), 
-            body: JSON.stringify({ estado: 'en_preparacion' }) 
-          });
-          if (!res.ok) throw new Error(await res.text());
-          await loadPedidos();
-        } catch (err) { 
-          alert('Error: ' + err.message); 
-        }
-      });
-    });
+          const tipo = prompt('Tipo de comprobante (boleta/factura):', 'boleta');
+          if (!tipo) return;
 
-    document.querySelectorAll('.btn-ready').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const pedidoId = btn.dataset.pedido;
-        const detalleId = btn.dataset.detalle;
-        try {
-          const res = await fetch(`${ORDERS_API}/${pedidoId}/detalles/${detalleId}/estado`, { 
-            method: 'PUT', 
-            headers: authHeaders(), 
-            body: JSON.stringify({ estado: 'entregado' }) 
+          const payload = { pedidoId: parseInt(pedidoId), tipo };
+          if (tipo === 'factura') {
+            payload.ruc = prompt('RUC:');
+            payload.razonSocial = prompt('Razón Social:');
+          }
+
+          const res = await fetch(INVOICES_API, {
+            method: 'POST',
+            headers: authHeaders(),
+            body: JSON.stringify(payload)
           });
-          if (!res.ok) throw new Error(await res.text());
-          await loadPedidos();
-        } catch (err) { 
-          alert('Error: ' + err.message); 
+
+          if (!res.ok) {
+            const err = await res.text();
+            throw new Error(err);
+          }
+
+          const factura = await res.json();
+          alert(`✅ ${tipo.toUpperCase()} generada ID: ${factura.id}`);
+          await loadReadyOrders();
+        } catch (err) {
+          alert('Error al generar comprobante: ' + err.message);
         }
       });
     });
@@ -124,9 +136,9 @@ function updateTimestamp() {
     `Última actualización: ${now.toLocaleTimeString('es-ES')}`;
 }
 
-document.getElementById('btnRefresh').addEventListener('click', loadPedidos);
+document.getElementById('btnRefresh').addEventListener('click', loadReadyOrders);
 
 window.addEventListener('DOMContentLoaded', () => {
-  loadPedidos();
-  setInterval(loadPedidos, 8000);
+  loadReadyOrders();
+  setInterval(loadReadyOrders, 8000);
 });

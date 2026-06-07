@@ -1,15 +1,135 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-        <link rel="stylesheet" href="../CSS/styledash.css"></head>
+    <title>Toma de Pedido (In)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../CSS/styledash.css">
+    <style>
+        body { background: transparent; }
 
+        .kitchen-dashboard {
+            padding: 20px;
+        }
+
+        .mesa-card {
+            background: rgba(255, 255, 255, 0.93);
+            border: 1px solid #dbe3ea;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .mesa-card-title {
+            color: #1b3a57;
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mesa-card-title .badge {
+            font-size: 0.75rem;
+        }
+
+        .kitchen-table {
+            margin-bottom: 0;
+        }
+
+        .kitchen-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .kitchen-actions .btn {
+            font-size: 0.78rem;
+            padding: 3px 8px;
+        }
+
+        .estado-badge {
+            font-size: 0.78rem;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .estado-pendiente {
+            background: #f0f0f0;
+            color: #555;
+        }
+
+        .estado-en_preparacion {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .estado-listo {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .estado-entregado {
+            background: #cfe2ff;
+            color: #084298;
+        }
+
+        .refresh-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+
+        #ultimaActualizacion {
+            font-size: 0.82rem;
+            color: #666;
+        }
+
+        #sinPedidos {
+            display: none;
+        }
+
+        .btn-action-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: #1b3a57;
+            color: #fff;
+            border: none;
+            border-radius: 999px;
+            padding: 7px 18px;
+            font-size: .85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background .2s, transform .15s;
+            letter-spacing: .02em;
+        }
+
+        .btn-action-primary:hover {
+            background: #2f5b84;
+            transform: translateY(-1px);
+            color: #fff;
+        }
+    </style>
+</head>
 <body>
+    <main class="container-fluid kitchen-dashboard">
+        <div class="refresh-bar">
+            <button class="btn-action-primary" id="btnRefresh">↺ Actualizar</button>
+            <span id="ultimaActualizacion">–</span>
+        </div>
+
+        <div id="mesasContainer">Cargando pedidos…</div>
+
+        <div id="sinPedidos" class="text-center text-muted py-5">
+            <p style="font-size:1.2rem;">✅ No hay pedidos pendientes en este momento.</p>
+        </div>
+    </main>
     <table class="table table-striped table-dark table-hover table-bordered">
         <caption>Tabla de informacion</caption>
         <thead>
