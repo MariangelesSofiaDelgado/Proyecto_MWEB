@@ -29,6 +29,7 @@ function etiquetaEstado(estado) {
         en_preparacion: "Preparando",
         listo:          "Listo ✓",
         entregado:      "Entregado",
+        rechazado:      "Rechazado",
     };
     return mapa[estado] || estado;
 }
@@ -89,22 +90,29 @@ function renderCocina(pedidos) {
                                 data-detalle-id="${detalle.detalleId}"
                                 data-pedido-id="${pedido.id}"
                                 data-estado="en_preparacion"
-                                ${detalle.estadoDetalle === "en_preparacion" ? "disabled" : ""}>
+                                ${detalle.estadoDetalle === "en_preparacion" || detalle.estadoDetalle === "rechazado" ? "disabled" : ""}>
                                 Preparar
                             </button>
                             <button class="btn btn-success btn-accion"
                                 data-detalle-id="${detalle.detalleId}"
                                 data-pedido-id="${pedido.id}"
                                 data-estado="listo"
-                                ${detalle.estadoDetalle === "listo" ? "disabled" : ""}>
+                                ${detalle.estadoDetalle === "listo" || detalle.estadoDetalle === "rechazado" ? "disabled" : ""}>
                                 Listo
                             </button>
                             <button class="btn btn-primary btn-accion"
                                 data-detalle-id="${detalle.detalleId}"
                                 data-pedido-id="${pedido.id}"
                                 data-estado="entregado"
-                                ${detalle.estadoDetalle === "entregado" ? "disabled" : ""}>
+                                ${detalle.estadoDetalle === "entregado" || detalle.estadoDetalle === "rechazado" ? "disabled" : ""}>
                                 Entregado
+                            </button>
+                            <button class="btn btn-danger btn-accion"
+                                data-detalle-id="${detalle.detalleId}"
+                                data-pedido-id="${pedido.id}"
+                                data-estado="rechazado"
+                                ${detalle.estadoDetalle === "rechazado" ? "disabled" : ""}>
+                                Rechazar
                             </button>
                         </div>
                     </td>
