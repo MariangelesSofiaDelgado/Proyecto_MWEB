@@ -260,7 +260,7 @@ if (radioPresencial && radioDelivery) {
 
 // Abrir el modal de Checkout desde el carrito
 if (submitOrderButton) {
-    submitOrderButton.addEventListener("click", () => {
+    submitOrderButton.addEventListener("click", async() => {
         if (cart.size === 0) {
             alert("Agrega al menos un plato al carrito antes de enviar el pedido.");
             return;
@@ -271,6 +271,7 @@ if (submitOrderButton) {
             alert("Por favor, inicia sesión para realizar un pedido.");
             return;
         }
+        await cargarMesasEnSelect(); 
         
         if (checkoutModal) checkoutModal.show();
     });
@@ -347,7 +348,46 @@ if (confirmCheckoutBtn) {
         }
     });
 }
+// ── Cargar mesas libres desde la API ──────────────────────────────────────
+const MESAS_API_URL = "http://localhost:8080/api/mesas/estado";
 
+async function cargarMesasEnSelect() {
+  const select = document.getElementById("numeroMesa");
+  if (!select) return;
+
+  select.innerHTML = '<option value="" disabled selected>Cargando mesas…</option>';
+
+  try {
+    const response = await fetch(MESAS_API_URL, {
+      method: "GET",
+      headers: authHeaders()
+    });
+    if (!response.ok) throw new Error(`Error ${response.status}`);
+
+    const mesas = await response.json();
+    const libres = mesas.filter(m => m.libre);
+
+    if (libres.length === 0) {
+      select.innerHTML = '<option value="" disabled selected>No hay mesas disponibles</option>';
+      return;
+    }
+
+    select.innerHTML = '<option value="" disabled selected>Selecciona tu mesa…</option>';
+    libres.forEach(m => {
+      const opt = document.createElement("option");
+      opt.value = m.id;
+      // Capitaliza la ubicación: "interior" → "Interior"
+      const ubicacion = m.ubicacion
+        ? m.ubicacion.charAt(0).toUpperCase() + m.ubicacion.slice(1)
+        : "";
+      opt.textContent = `Mesa ${m.codigo}${ubicacion ? ` (${ubicacion})` : ""}`;
+      select.appendChild(opt);
+    });
+  } catch (error) {
+    console.error("Error al cargar mesas:", error);
+    select.innerHTML = '<option value="" disabled selected>Error al cargar mesas</option>';
+  }
+}
 // Inicialización
 updateCartUI();
 resetMenuData();

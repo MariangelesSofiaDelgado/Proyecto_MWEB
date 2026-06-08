@@ -79,6 +79,11 @@ public class PedidoController {
 
                 Mesa mesa = mesaRepository.findById(mesaId)
                         .orElseThrow(() -> new IllegalArgumentException("La mesa seleccionada no existe."));
+
+                // ── MARCAR LA MESA COMO OCUPADA AL RECIBIR EL PEDIDO ──
+                mesa.setEstado("ocupada");
+                mesaRepository.save(mesa);
+
                 pedido.setMesa(mesa);
             } else {
                 String direccion = getString(request, "direccion", "direccionDelivery", "direccion_delivery");
@@ -163,7 +168,8 @@ public class PedidoController {
             String nuevoEstado = normalizarEstado(request.getEstado());
             pedido.setEstado(nuevoEstado);
 
-            if (pedido.getMesa() != null && ("entregado".equals(nuevoEstado) || "cancelado".equals(nuevoEstado))) {
+            // ── LIBERAR LA MESA cuando el pedido se cierra ──
+            if (pedido.getMesa() != null && ("entregado".equals(nuevoEstado) || "cancelado".equals(nuevoEstado) || "facturado".equals(nuevoEstado))) {
                 pedido.getMesa().setEstado("libre");
             }
 
@@ -178,9 +184,6 @@ public class PedidoController {
         }
     }
 
-    // ==========================================
-    // NUEVO ENDPOINT INTEGRADO
-    // ==========================================
     @PutMapping("/{pedidoId}/detalles/{detalleId}/estado")
     @Transactional
     public ResponseEntity<?> actualizarEstadoDetalle(
@@ -215,9 +218,7 @@ public class PedidoController {
         }
     }
 
-    // ==========================================
-    // MÉTODOS PRIVADOS DE UTILIDAD
-    // ==========================================
+    // ── Helpers ──────────────────────────────────────────────────────────────
 
     private String normalizarTipo(String tipoPedido) {
         String tipo = tipoPedido == null ? "presencial" : tipoPedido.trim().toLowerCase();
@@ -230,17 +231,10 @@ public class PedidoController {
     private String normalizarEstado(String estadoPedido) {
         String estado = estadoPedido == null ? "" : estadoPedido.trim().toLowerCase();
         List<String> estadosPermitidos = List.of(
-                "nuevo",
-                "en_preparacion",
-                "listo",
-                "entregado",
-                "facturado",
-                "cancelado");
-
+                "nuevo", "en_preparacion", "listo", "entregado", "facturado", "cancelado");
         if (!estadosPermitidos.contains(estado)) {
             throw new IllegalArgumentException("Estado de pedido inválido.");
         }
-
         return estado;
     }
 
@@ -292,7 +286,7 @@ public class PedidoController {
     private PedidoDashboardResponse mapPedidoDashboard(Pedido pedido) {
         List<PedidoDetalleResponse> detalles = pedido.getDetalles()
                 .stream()
-                .map((detalle) -> new PedidoDetalleResponse(
+                .map(detalle -> new PedidoDetalleResponse(
                         detalle.getProducto().getId(),
                         detalle.getProducto().getNombre(),
                         detalle.getCantidad(),
