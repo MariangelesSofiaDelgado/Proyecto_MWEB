@@ -5,7 +5,6 @@
 }
 
 body {
-    background-color: #f5f5f5;
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     min-height: 100vh;
     color: #1b3a57;
@@ -165,47 +164,6 @@ body {
     box-shadow: 0 10px 22px rgba(0, 0, 0, 0.04);
 }
 
-
-
-
-.mesa-link {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    min-height: 72px;
-    border-radius: 14px;
-    background: #1b3a57;
-    color: #fff;
-    text-decoration: none;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    transition: transform 0.2s ease, background-color 0.2s ease;
-}
-
-.mesa-link:hover {
-    background: #244c72;
-    color: #fff;
-    transform: translateY(-2px);
-}
-
-.mesa-link:focus-visible {
-    outline: 3px solid rgba(27, 58, 87, 0.3);
-    outline-offset: 2px;
-}
-
-.mesa-detail-hero {
-    background: linear-gradient(135deg, #1b3a57, #2f5b84);
-    color: #fff;
-    border-radius: 18px;
-    padding: 24px;
-    box-shadow: 0 12px 28px rgba(27, 58, 87, 0.16);
-}
-
-.mesa-detail-hero .badge {
-    font-size: 0.9rem;
-    padding: 0.55em 0.85em;
-}
 
 .category-card {
     border: none;
@@ -553,48 +511,77 @@ body {
     border-bottom: 2px solid #e2e8f0;
 }
 
-/* ── Tarjeta de mesa ─────────────────────────── */
+
+/* ════════════════════════════════════════
+       LAYOUT
+    ════════════════════════════════════════ */
+.sala-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+#lastUpdate {
+    font-size: .73rem;
+    color: #94a3b8;
+}
+
+.section-title {
+    font-size: .95rem;
+    font-weight: 700;
+    color: #1b3a57;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 24px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+/* ════════════════════════════════════════
+       TARJETA DE MESA
+    ════════════════════════════════════════ */
 .card.mesa {
     border-radius: 14px;
     border: 2px solid;
-    overflow: hidden;
 }
 
-/* DISPONIBLE → verde */
+/* -- Verde: disponible / libre */
 .card.mesa.disponible {
     background: #f0fdf4;
     border-color: #4ade80;
 }
 
-/* OCUPADA → amarillo */
+/* -- Amarillo: ocupada */
 .card.mesa.ocupada {
     background: #fefce8;
     border-color: #facc15;
 }
 
-/* RESERVADA → gris */
+/* -- Gris: reservada */
 .card.mesa.reservada {
     background: #f1f5f9;
     border-color: #94a3b8;
 }
 
-/* FUERA DE SERVICIO → rojo */
+/* -- Rojo: fuera de servicio */
 .card.mesa.fuera {
     background: #fff1f2;
     border-color: #f87171;
 }
-
-/* ── Mesa link (botón principal) ─────────────── */
 .mesa-link {
+    display: block;
+    text-align: center;
     font-weight: 700;
     font-size: .88rem;
     letter-spacing: .04em;
     border-radius: 9px;
-    padding: 10px 6px;
-    text-align: center;
-    display: block;
-    text-decoration: none;
+    padding: 10px 4px;
     color: #fff;
+    text-decoration: none;
 }
 
 .disponible .mesa-link {
@@ -612,99 +599,113 @@ body {
 .fuera .mesa-link {
     background: #dc2626;
     pointer-events: none;
-    opacity: .75;
+    opacity: .7;
 }
 
-/* ── Badge estado ────────────────────────────── */
-.mesa-estado-badge {
-    font-size: .65rem;
+/* ── Badge estado ── */
+.mesa-badge {
+    font-size: .64rem;
     font-weight: 700;
     padding: 2px 8px;
     border-radius: 999px;
-    display: inline-block;
+    display: block;
     text-align: center;
 }
 
-.badge-disponible {
+.disponible .mesa-badge {
     background: #dcfce7;
     color: #15803d;
 }
 
-.badge-ocupada {
+.ocupada .mesa-badge {
     background: #fef9c3;
     color: #a16207;
 }
 
-.badge-reservada {
+.reservada .mesa-badge {
     background: #e2e8f0;
     color: #475569;
 }
 
-.badge-fuera {
+.fuera .mesa-badge {
     background: #fee2e2;
     color: #dc2626;
 }
 
-/* ── Botones acción (fila inferior) ──────────── */
+
 .mesa-actions {
     display: flex;
-    gap: 5px;
+    gap: 4px;
     margin-top: 4px;
 }
 
-.btn-accion {
+.btn-ac {
     flex: 1;
-    font-size: .68rem;
+    font-size: .66rem;
     font-weight: 700;
     border: none;
     border-radius: 8px;
-    padding: 5px 4px;
+    padding: 5px 3px;
     cursor: pointer;
-    transition: background .18s, opacity .18s;
     white-space: nowrap;
 }
 
-.btn-accion:disabled {
-    opacity: .38;
+.btn-ac:disabled {
+    opacity: .32;
     cursor: not-allowed;
 }
 
-/* Cocina */
-.btn-cocina-accion {
-    background: #1b3a57;
-    color: #fff;
-}
-
-.btn-cocina-accion:hover:not(:disabled) {
-    background: #2f5b84;
-}
-
-/* Fuera de servicio */
-.btn-fuera-accion {
+.btn-fuera {
     background: #ef4444;
     color: #fff;
 }
 
-.btn-fuera-accion:hover:not(:disabled) {
+.btn-fuera:hover:not(:disabled) {
     background: #b91c1c;
 }
 
-/* Liberar (volver a disponible) */
-.btn-liberar-accion {
+.btn-liberar {
     background: #16a34a;
     color: #fff;
+    margin-top: 4px;
+    width: 100%;
 }
 
-.btn-liberar-accion:hover:not(:disabled) {
+.btn-liberar:hover:not(:disabled) {
     background: #15803d;
 }
 
-/* ── Sala loading / error ────────────────────── */
+.btn-eliminar {
+    background: transparent;
+    color: #dc2626;
+    border: 1px solid #f87171;
+    font-size: .62rem;
+    border-radius: 8px;
+    padding: 3px 6px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 3px;
+    transition: background .15s;
+}
+
+.btn-eliminar:hover {
+    background: #fee2e2;
+}
+
 .sala-loading {
     text-align: center;
     padding: 40px;
     color: #8fa3b0;
     font-size: .9rem;
+}
+
+.sala-empty {
+    text-align: center;
+    padding: 40px;
+    color: #94a3b8;
+    font-size: .9rem;
+    border: 2px dashed #e2e8f0;
+    margin-top: 16px;
 }
 
 .sala-error {
@@ -716,3 +717,60 @@ body {
     font-size: .88rem;
     margin: 12px 0;
 }
+
+.btn-add-mesa {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: #1b3a57;
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    padding: 8px 20px;
+    font-size: .87rem;
+    font-weight: 700;
+    cursor: pointer;
+
+}
+
+.btn-send-kitchen {
+      background: linear-gradient(135deg, #ca8a04, #f59e0b);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 24px;
+      font-weight: 700;
+      font-size: .95rem;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: transform .15s, box-shadow .15s, opacity .15s;
+      box-shadow: 0 4px 14px rgba(202, 138, 4, .35);
+    }
+    .btn-send-kitchen:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(202, 138, 4, .45);
+    }
+    .btn-send-kitchen:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+    .auto-refresh-badge {
+      font-size: .72rem;
+      background: #e8f1fb;
+      color: #1b3a57;
+      border: 1px solid #c9daef;
+      border-radius: 999px;
+      padding: 2px 10px;
+      margin-left: 8px;
+      font-weight: 600;
+    }
+    #refresh-countdown {
+      font-size: .72rem;
+      color: #94a3b8;
+      display: inline-block;
+    }
