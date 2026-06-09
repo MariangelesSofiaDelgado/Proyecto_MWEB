@@ -126,7 +126,7 @@
                 <configuration>
                     <excludes>
                         <exclude>
-                            <groupId>org.projectjombok</groupId>
+                            <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
