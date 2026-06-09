@@ -1,7 +1,7 @@
 // ══════════════════════════════════════════════════════════
 //  ReporteVentas.js  —  Yaku Sabor
 //  Carpeta: Frontend/Dashboard/JS/
-//  Conecta con Spring Boot en http://localhost:8080
+//  Conecta con Spring Boot mediante la API configurada en runtime
 // ══════════════════════════════════════════════════════════
 
 const resolveApiBaseUrl = () => {

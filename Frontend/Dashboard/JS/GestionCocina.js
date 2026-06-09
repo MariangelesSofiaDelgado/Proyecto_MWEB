@@ -304,7 +304,7 @@ setInterval(() => cargarPedidos(true), 15000);
 // ══════════════════════════════════════════════════════════
 //  MODAL ESTADO PLATILLOS (sin cambios respecto al original)
 // ══════════════════════════════════════════════════════════
-const API_PRODUCTOS = "http://localhost:8080/api/productos";
+const API_PRODUCTOS = `${API_BASE}/productos`;
 
 const modalPlatillosEl = document.getElementById("modalPlatillos");
 const modalPlatillos   = new bootstrap.Modal(modalPlatillosEl);

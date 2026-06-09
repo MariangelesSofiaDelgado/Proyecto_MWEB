@@ -239,7 +239,22 @@
 // ══════════════════════════════════════════════════
 //  CONFIGURACIÓN
 // ══════════════════════════════════════════════════
-const API = 'http://localhost:8080/api/usuarios/meseros';
+function resolveApiBaseUrl() {
+    const override = window.__API_BASE_URL__ || localStorage.getItem('apiBaseUrl');
+    if (override) {
+        return override.replace(/\/$/, '');
+    }
+
+    const { origin, hostname, protocol } = window.location;
+
+    if (hostname.endsWith('.app.github.dev') || hostname.endsWith('.githubpreview.dev')) {
+        return origin.replace(/-(\d+)\.app\.github\.dev$/, '-8080.app.github.dev').replace(/-(\d+)\.githubpreview\.dev$/, '-8080.githubpreview.dev') + '/api';
+    }
+
+    return `${protocol}//${hostname}:8080/api`;
+}
+
+const API = `${resolveApiBaseUrl()}/usuarios/meseros`;
 
 const COLORES = ['#1b3a57','#2f5b84','#e07b00','#16a34a','#7c3aed','#dc2626','#0891b2','#0f766e','#b45309'];
 
