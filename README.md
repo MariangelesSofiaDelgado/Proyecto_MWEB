@@ -224,13 +224,14 @@ facturas       → Boletas y facturas vinculadas a pedidos
 
 ## 👨‍💻 Autor
 
-**Lincoln Vega**\
-**Sofia Delgado**\
-**William Oliva**\
-**Jeremy Espinoza**\
-**Roy Ramirez**\
-Estudiantes de Ingeniería de Sistemas e Informática — UTP  
-[lincolvegahidalgo@gmail.com](mailto:lincolvegahidalgo@gmail.com)
+- **Lincoln Vega**\
+- **Sofia Delgado**\
+- **William Oliva**\
+- **Jeremy Espinoza**\
+- **Roy Ramirez**\
+\
+> Estudiantes de Ingeniería de Sistemas e Informática — UTP  
+> [lincolvegahidalgo@gmail.com](mailto:lincolvegahidalgo@gmail.com)
 
 ---
 
