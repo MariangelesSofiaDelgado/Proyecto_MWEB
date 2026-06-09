@@ -54,15 +54,14 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // Orígenes permitidos — ajustar según el puerto del frontend en cada PC
-        // Live Server de VS Code usa 5500/5501; otros servidores locales usan 3000
-        config.setAllowedOrigins(Arrays.asList(
-            "http://localhost:3000",
-            "http://127.0.0.1:3000",
-            "http://localhost:5500",
-            "http://127.0.0.1:5500",
-            "http://localhost:5501",
-            "http://127.0.0.1:5501"
+        // Permite frontend local y URLs públicas de Codespaces.
+        config.setAllowedOriginPatterns(Arrays.asList(
+            "http://localhost:*",
+            "http://127.0.0.1:*",
+            "https://localhost:*",
+            "https://127.0.0.1:*",
+            "https://*.app.github.dev",
+            "https://*.githubpreview.dev"
         ));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(Arrays.asList("*"));

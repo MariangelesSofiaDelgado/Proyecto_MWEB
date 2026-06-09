@@ -1,8 +1,24 @@
 // ══════════════════════════════════════════════════════
 // CONFIG
 // ══════════════════════════════════════════════════════
-const API_PRODUCTOS   = "http://localhost:8080/api/productos";
-const API_CATEGORIAS  = "http://localhost:8080/api/categorias";
+const resolveApiBaseUrl = () => {
+  const override = window.__API_BASE_URL__ || localStorage.getItem("apiBaseUrl");
+  if (override) {
+    return override.replace(/\/$/, "");
+  }
+
+  const { origin, hostname, protocol } = window.location;
+
+  if (hostname.endsWith(".app.github.dev") || hostname.endsWith(".githubpreview.dev")) {
+    return origin.replace(/-(\d+)\.app\.github\.dev$/, "-8080.app.github.dev").replace(/-(\d+)\.githubpreview\.dev$/, "-8080.githubpreview.dev") + "/api";
+  }
+
+  return `${protocol}//${hostname}:8080/api`;
+};
+
+const API_BASE       = resolveApiBaseUrl();
+const API_PRODUCTOS   = `${API_BASE}/productos`;
+const API_CATEGORIAS  = `${API_BASE}/categorias`;
 const PAGE_SIZE       = 10;
  
 // ── Helpers ────────────────────────────────────────────

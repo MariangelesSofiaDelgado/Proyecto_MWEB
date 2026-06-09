@@ -21,6 +21,23 @@ function authHeaders() {
     };
 }
 
+function resolveApiBaseUrl() {
+    const override = window.__API_BASE_URL__ || localStorage.getItem("apiBaseUrl");
+    if (override) {
+        return override.replace(/\/$/, "");
+    }
+
+    const { origin, hostname, protocol } = window.location;
+
+    if (hostname.endsWith(".app.github.dev") || hostname.endsWith(".githubpreview.dev")) {
+        return origin.replace(/-(\d+)\.app\.github\.dev$/, "-8080.app.github.dev").replace(/-(\d+)\.githubpreview\.dev$/, "-8080.githubpreview.dev") + "/api";
+    }
+
+    return `${protocol}//${hostname}:8080/api`;
+}
+
+const API_BASE_URL = resolveApiBaseUrl();
+
 // ==========================================
 // LÓGICA DE SESIÓN Y FORMULARIOS (LOGIN/REGISTRO)
 // ==========================================
@@ -113,7 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             try {
                 // AQUÍ NO VA authHeaders() PORQUE ES EL LOGIN PÚBLICO
-                const response = await fetch("http://localhost:8080/api/auth/login", {
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -172,7 +189,7 @@ document.addEventListener("DOMContentLoaded", () => {
             try {
                 // AQUÍ TAMPOCO VA authHeaders() PORQUE ES EL REGISTRO PÚBLICO
                 const response = await fetch(
-                    "http://localhost:8080/api/auth/registro",
+                    `${API_BASE_URL}/auth/registro`,
                     {
                         method: "POST",
                         headers: {
