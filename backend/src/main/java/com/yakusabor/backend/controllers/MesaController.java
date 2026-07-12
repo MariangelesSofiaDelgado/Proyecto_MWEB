@@ -11,12 +11,23 @@ import org.springframework.web.bind.annotation.*;
 
 import com.yakusabor.backend.dto.MesaEstadoResponse;
 import com.yakusabor.backend.services.MesaService;
+import com.yakusabor.backend.services.PedidoService;
 
 @RestController
 @RequestMapping("/api/mesas")
 public class MesaController {
 
     @Autowired private MesaService mesaService;
+    @Autowired private PedidoService pedidoService;
+
+    @GetMapping("/{id}/cuenta")
+public ResponseEntity<?> obtenerCuenta(@PathVariable Integer id) {
+    try {
+        return ResponseEntity.ok(pedidoService.obtenerCuentaMesa(id));
+    } catch (IllegalArgumentException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
+    }
+}
 
     @GetMapping("/estado")
     public List<MesaEstadoResponse> obtenerEstadoMesas() {

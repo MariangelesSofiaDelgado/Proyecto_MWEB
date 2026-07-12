@@ -90,8 +90,7 @@
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
         crossorigin="anonymous"></script>
     <script>
-
-                function resolveApiBaseUrl() {
+        function resolveApiBaseUrl() {
             const override = window.__API_BASE_URL__ || localStorage.getItem("apiBaseUrl");
             if (override) {
                 return override.replace(/\/$/, "");
@@ -105,7 +104,9 @@
 
             return `${protocol}//${hostname}:8080/api`;
         }
-        
+
+        const API_BASE = resolveApiBaseUrl();
+
         const moduleLinks = Array.from(document.querySelectorAll('.js-dashboard-link'));
         const moduleFrame = document.getElementById('dashboard-content-frame');
         const viewerTitle = document.getElementById('viewer-title');
@@ -230,5 +231,4 @@
         loadSession();
     </script>
 </body>
-
 </html>
