@@ -19,4 +19,7 @@ public class PedidoDashboardResponse {
     private String mesaCodigo;
     private String direccionDelivery;
     private List<PedidoDetalleResponse> detalles;
+    private Integer meseroId;
+    private String meseroNombre;
+    private String turno;
 }

@@ -211,9 +211,14 @@ private static final List<String> ESTADOS_DETALLE =
                 .toList();
 
         Mesa mesa = pedido.getMesa();
+        Usuario mesero = pedido.getMesero();
+
         return new PedidoDashboardResponse(
                 pedido.getId(), pedido.getTipo(), pedido.getEstado(), pedido.getTotal(), pedido.getCreatedAt(),
                 mesa != null ? mesa.getId() : null, mesa != null ? mesa.getCodigo() : null,
-                pedido.getDireccionDelivery(), detalles);
+                pedido.getDireccionDelivery(), detalles,
+                mesero != null ? mesero.getId() : null,
+                mesero != null ? mesero.getNombre() : null,
+                mesero != null ? mesero.getTurno() : null);
     }
 }

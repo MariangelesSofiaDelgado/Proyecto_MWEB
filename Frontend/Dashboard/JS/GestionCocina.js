@@ -8,24 +8,9 @@
 //  - Si todos los platos de una mesa son entregados/rechazados,
 //    la tarjeta de esa mesa también desaparece.
 // ══════════════════════════════════════════════════════════
+// resolveApiBaseUrl(), authHeaders(), API_BASE_URL vienen de api-config.js
 
-const resolveApiBaseUrl = () => {
-  const override = window.__API_BASE_URL__ || localStorage.getItem("apiBaseUrl");
-  if (override) {
-    return override.replace(/\/$/, "");
-  }
-
-  const { origin, hostname, protocol } = window.location;
-
-  if (hostname.endsWith(".app.github.dev") || hostname.endsWith(".githubpreview.dev")) {
-    return origin.replace(/-(\d+)\.app\.github\.dev$/, "-8080.app.github.dev").replace(/-(\d+)\.githubpreview\.dev$/, "-8080.githubpreview.dev") + "/api";
-  }
-
-  return `${protocol}//${hostname}:8080/api`;
-};
-
-const API_BASE    = resolveApiBaseUrl();
-const PEDIDOS_URL = `${API_BASE}/pedidos`;
+const PEDIDOS_URL = `${API_BASE_URL}/pedidos`;
 
 const mesasContainer = document.getElementById("mesasContainer");
 const sinPedidos     = document.getElementById("sinPedidos");
@@ -34,14 +19,6 @@ const ultimaAct      = document.getElementById("ultimaActualizacion");
 let actualizando = false;
 
 // ── Helpers ────────────────────────────────────────────────────────────────
-
-function authHeaders() {
-  const token = localStorage.getItem("token");
-  return {
-    "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
-}
 
 function etiquetaEstado(estado) {
   const mapa = {
@@ -304,7 +281,7 @@ setInterval(() => cargarPedidos(true), 15000);
 // ══════════════════════════════════════════════════════════
 //  MODAL ESTADO PLATILLOS (sin cambios respecto al original)
 // ══════════════════════════════════════════════════════════
-const API_PRODUCTOS = `${API_BASE}/productos`;
+const API_PRODUCTOS = `${API_BASE_URL}/productos`;
 
 const modalPlatillosEl = document.getElementById("modalPlatillos");
 const modalPlatillos   = new bootstrap.Modal(modalPlatillosEl);
@@ -315,11 +292,7 @@ const platStatusEl   = document.getElementById("platillosStatus");
 const availCounterEl = document.getElementById("availCounter");
 
 function authHeadersModal() {
-  const token = localStorage.getItem("token");
-  return {
-    "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {})
-  };
+  return authHeaders();
 }
 
 const esc = v => String(v ?? "")

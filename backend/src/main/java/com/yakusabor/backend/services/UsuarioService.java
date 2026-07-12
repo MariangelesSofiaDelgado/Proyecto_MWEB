@@ -24,6 +24,8 @@ public class UsuarioService {
     @Autowired private PedidoRepository pedidoRepository;
     @Autowired private PasswordEncoder passwordEncoder;
 
+    private static final List<String> TURNOS_VALIDOS = List.of("Mañana", "Tarde", "Noche");
+
     public List<Map<String, Object>> listarMeseros() {
         Optional<Rol> rolOpt = rolRepository.findByNombre("Mesero");
         if (rolOpt.isEmpty()) return List.of();
@@ -61,7 +63,8 @@ public class UsuarioService {
             return Map.<String, Object>of(
                     "id", m.getId(), "nombre", m.getNombre(), "email", m.getEmail(),
                     "activo", m.getActivo() != null ? m.getActivo() : true,
-                    "turno", "—", "ventasDia", ventasHoy, "mesas", (int) mesasHoy, "promedio", promedio
+                    "turno", m.getTurno() != null ? m.getTurno() : "Tarde",
+                    "ventasDia", ventasHoy, "mesas", (int) mesasHoy, "promedio", promedio
             );
         }).collect(Collectors.toList());
     }
@@ -70,11 +73,13 @@ public class UsuarioService {
         String nombre = body.getOrDefault("nombre", "").trim();
         String email = body.getOrDefault("email", "").trim();
         String password = body.getOrDefault("password", "").trim();
+        String turno = body.getOrDefault("turno", "Tarde").trim();
 
         if (nombre.isEmpty()) throw new IllegalArgumentException("El nombre es obligatorio.");
         if (email.isEmpty()) throw new IllegalArgumentException("El correo es obligatorio.");
         if (password.isEmpty()) throw new IllegalArgumentException("La contraseña es obligatoria.");
         if (usuarioRepository.existsByEmail(email)) throw new IllegalArgumentException("El correo ya está en uso.");
+        if (!TURNOS_VALIDOS.contains(turno)) turno = "Tarde";
 
         Rol rolMesero = rolRepository.findByNombre("Mesero")
                 .orElseThrow(() -> new IllegalStateException("El rol 'Mesero' no existe en la base de datos."));
@@ -85,11 +90,12 @@ public class UsuarioService {
         nuevo.setPassword(passwordEncoder.encode(password));
         nuevo.setRol(rolMesero);
         nuevo.setActivo(true);
+        nuevo.setTurno(turno);
 
         Usuario guardado = usuarioRepository.save(nuevo);
 
         return Map.of("id", guardado.getId(), "nombre", guardado.getNombre(), "email", guardado.getEmail(),
-                "activo", true, "turno", "—", "ventasDia", 0, "mesas", 0, "promedio", 0);
+                "activo", true, "turno", guardado.getTurno(), "ventasDia", 0, "mesas", 0, "promedio", 0);
     }
 
     public void eliminarMesero(Integer id) {

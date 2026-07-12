@@ -1,46 +1,8 @@
 // ==========================================
-// FUNCIONES UTILITARIAS GLOBALES
-// ==========================================
-
-// Esta función debe estar disponible para menu.js y los JS del dashboard.
-// Si usas módulos, deberías exportarla. Si cargas este script globalmente,
-// quedará disponible para las demás funciones.
-function authHeaders() {
-    const token = localStorage.getItem("token");
-
-    // Si no hay token, solo devuelve el Content-Type para evitar errores de sintaxis
-    if (!token) {
-        return {
-            "Content-Type": "application/json",
-        };
-    }
-
-    return {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-    };
-}
-
-function resolveApiBaseUrl() {
-    const override = window.__API_BASE_URL__ || localStorage.getItem("apiBaseUrl");
-    if (override) {
-        return override.replace(/\/$/, "");
-    }
-
-    const { origin, hostname, protocol } = window.location;
-
-    if (hostname.endsWith(".app.github.dev") || hostname.endsWith(".githubpreview.dev")) {
-        return origin.replace(/-(\d+)\.app\.github\.dev$/, "-8080.app.github.dev").replace(/-(\d+)\.githubpreview\.dev$/, "-8080.githubpreview.dev") + "/api";
-    }
-
-    return `${protocol}//${hostname}:8080/api`;
-}
-
-const API_BASE_URL = resolveApiBaseUrl();
-
-// ==========================================
 // LÓGICA DE SESIÓN Y FORMULARIOS (LOGIN/REGISTRO)
 // ==========================================
+// authHeaders(), resolveApiBaseUrl(), API_BASE_URL vienen de api-config.js
+// clearSession() también viene de api-config.js
 document.addEventListener("DOMContentLoaded", () => {
     const publicHomePath = "../../Principal/HTML/index.html";
 

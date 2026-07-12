@@ -10,7 +10,6 @@
         rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="../CSS/ReporteVentas.css" />
-    <!-- Sin CSS de modal ni KPI clickeable -->
 </head>
 
 <body>
@@ -59,7 +58,7 @@
             </div>
         </div>
 
-        <!-- ✅ KPI Meseros — solo informativo, NO clickeable -->
+        <!-- KPI Meseros — solo informativo -->
         <div class="rv-kpi-card" id="kpiMeseros">
             <div class="rv-kpi-icon rv-kpi-icon--orange">👥</div>
             <div class="rv-kpi-body">
@@ -134,94 +133,68 @@
     <!-- Toast -->
     <div class="rv-toast" id="rvToast"></div>
 
-    <!-- SIN MODAL DE GESTIÓN DE MOZOS — se usa la página Gestionmozos.html -->
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../JS/ReporteVentas.js"></script>
+
+    <!-- ══════════════════ CONFIG (debe ir ANTES de ReporteVentas.js) ══════════════════ -->
     <script>
-
-    // ══════════════════════════════════════════════
-    //  KPI MESEROS — muestra total registrados en BD
-    //  y cuántos tienen sesión activa (localStorage)
-    // ══════════════════════════════════════════════
-
-    const AH_KPI = () => {
-        const t = localStorage.getItem('token');
-        return {
-            'Content-Type': 'application/json',
-            ...(t ? { Authorization: `Bearer ${t}` } : {})
-        };
-    };
-
-    /**
-     * Cuenta cuántos meseros tienen sesión activa.
-     * login.js escribe en localStorage 'mozos_activos' = { [userId]: timestamp }
-     * cuando un Mesero inicia sesión, y lo borra al cerrar sesión.
-     * Aquí filtramos los que tienen un timestamp de menos de 8 horas.
-     */
-    function contarMeserosEnSesion() {
-        try {
-            const raw = localStorage.getItem('mozos_activos');
-            if (!raw) return 0;
-            const obj = JSON.parse(raw);
-            const TTL = 8 * 60 * 60 * 1000; // 8 horas
-            const ahora = Date.now();
-            return Object.values(obj).filter(ts => (ahora - ts) < TTL).length;
-        } catch {
-            return 0;
-        }
-    }
-
-    /**
-     * Llama al backend para obtener la lista real de meseros registrados,
-     * luego actualiza el KPI con el total y cuántos están en sesión activa.
-     */
-    async function actualizarKpiMeseros() {
-        try {
-            const res = await fetch(`${API_BASE}/usuarios/meseros`, {
-                headers: AH_KPI()
-            });
-            if (!res.ok) throw new Error('Error ' + res.status);
-            const lista = await res.json();
-
-            const totalRegistrados = Array.isArray(lista) ? lista.length : 0;
-            const enSesion = contarMeserosEnSesion();
-
-            document.getElementById('kpiMeserosVal').textContent = totalRegistrados;
-
-            if (enSesion > 0) {
-                document.getElementById('kpiMeserosSub').textContent =
-                    `${enSesion} en sesión activa`;
-            } else {
-                document.getElementById('kpiMeserosSub').textContent = 'Ninguno en sesión';
-            }
-        } catch {
-            document.getElementById('kpiMeserosVal').textContent = '—';
-            document.getElementById('kpiMeserosSub').textContent = 'Sin datos';
-        }
-    }
-
-    // Ejecutar al cargar la página
-    window.addEventListener('load', actualizarKpiMeseros);
-
-    </script>
         function resolveApiBaseUrl() {
             const override = window.__API_BASE_URL__ || localStorage.getItem("apiBaseUrl");
-            if (override) {
-                return override.replace(/\/$/, "");
-            }
-
+            if (override) return override.replace(/\/$/, "");
             const { origin, hostname, protocol } = window.location;
-
             if (hostname.endsWith(".app.github.dev") || hostname.endsWith(".githubpreview.dev")) {
-                return origin.replace(/-(\d+)\.app\.github\.dev$/, "-8080.app.github.dev").replace(/-(\d+)\.githubpreview\.dev$/, "-8080.githubpreview.dev") + "/api";
+                return origin.replace(/-(\d+)\.app\.github\.dev$/, "-8080.app.github.dev")
+                    .replace(/-(\d+)\.githubpreview\.dev$/, "-8080.githubpreview.dev") + "/api";
             }
-
             return `${protocol}//${hostname}:8080/api`;
         }
-
         const API_BASE = resolveApiBaseUrl();
 
+        function authHeaders() {
+            const token = localStorage.getItem("token");
+            return {
+                "Content-Type": "application/json",
+                ...(token ? { Authorization: `Bearer ${token}` } : {})
+            };
+        }
+    </script>
+
+    <script src="../JS/ReporteVentas.js"></script>
+
+    <!-- ══════════════════ KPI MESEROS ══════════════════ -->
+    <script>
+        function contarMeserosEnSesion() {
+            try {
+                const raw = localStorage.getItem('mozos_activos');
+                if (!raw) return 0;
+                const obj = JSON.parse(raw);
+                const TTL = 8 * 60 * 60 * 1000; // 8 horas
+                const ahora = Date.now();
+                return Object.values(obj).filter(ts => (ahora - ts) < TTL).length;
+            } catch {
+                return 0;
+            }
+        }
+
+        async function actualizarKpiMeseros() {
+            try {
+                const res = await fetch(`${API_BASE}/usuarios/meseros`, { headers: authHeaders() });
+                if (!res.ok) throw new Error('Error ' + res.status);
+                const lista = await res.json();
+
+                const totalRegistrados = Array.isArray(lista) ? lista.length : 0;
+                const enSesion = contarMeserosEnSesion();
+
+                document.getElementById('kpiMeserosVal').textContent = totalRegistrados;
+                document.getElementById('kpiMeserosSub').textContent =
+                    enSesion > 0 ? `${enSesion} en sesión activa` : 'Ninguno en sesión';
+            } catch {
+                document.getElementById('kpiMeserosVal').textContent = '—';
+                document.getElementById('kpiMeserosSub').textContent = 'Sin datos';
+            }
+        }
+
+        window.addEventListener('load', actualizarKpiMeseros);
+    </script>
 </body>
 
 </html>
