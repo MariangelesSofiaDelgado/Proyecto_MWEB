@@ -10,15 +10,20 @@ import org.springframework.stereotype.Service;
 
 import com.yakusabor.backend.dto.MesaEstadoResponse;
 import com.yakusabor.backend.models.Mesa;
+import com.yakusabor.backend.models.Pedido;
 import com.yakusabor.backend.repositories.MesaRepository;
+import com.yakusabor.backend.repositories.PedidoRepository;
 
 @Service
 public class MesaService {
 
     private static final List<String> ESTADOS_VALIDOS =
             List.of("libre", "ocupada", "reservada", "fuera_servicio");
+    private static final List<String> ESTADOS_PEDIDO_ABIERTOS =
+            List.of("nuevo", "en_preparacion", "listo", "entregado");
 
     @Autowired private MesaRepository mesaRepository;
+    @Autowired private PedidoRepository pedidoRepository;
 
     public List<MesaEstadoResponse> obtenerEstadoMesas() {
         return mesaRepository.findAll().stream()
@@ -56,6 +61,17 @@ public class MesaService {
         String nuevoEstado = body.getOrDefault("estado", "").trim().toLowerCase();
         if (!ESTADOS_VALIDOS.contains(nuevoEstado)) {
             throw new IllegalArgumentException("Estado inválido. Permitidos: " + ESTADOS_VALIDOS);
+        }
+
+        if ("libre".equals(nuevoEstado)) {
+            List<Pedido> pedidosAbiertos = pedidoRepository.findByMesa_Id(id).stream()
+                    .filter(p -> ESTADOS_PEDIDO_ABIERTOS.contains(p.getEstado()))
+                    .toList();
+
+            pedidosAbiertos.forEach(p -> {
+                p.setEstado("cancelado");
+                pedidoRepository.save(p);
+            });
         }
 
         mesa.setEstado(nuevoEstado);

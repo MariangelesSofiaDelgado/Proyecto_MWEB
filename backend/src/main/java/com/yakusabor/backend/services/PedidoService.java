@@ -1,4 +1,3 @@
-// PedidoService.java
 package com.yakusabor.backend.services;
 
 import java.math.BigDecimal;
@@ -22,14 +21,17 @@ import com.yakusabor.backend.repositories.MesaRepository;
 import com.yakusabor.backend.repositories.PedidoRepository;
 import com.yakusabor.backend.repositories.ProductoRepository;
 import com.yakusabor.backend.repositories.UsuarioRepository;
+import com.yakusabor.backend.dto.CuentaMesaResponse;
 
 @Service
 public class PedidoService {
 
 private static final List<String> ESTADOS_DETALLE =
-        List.of("pendiente", "en_preparacion", "listo", "entregado", "rechazado");
+            List.of("pendiente", "en_preparacion", "listo", "entregado", "rechazado");
     private static final List<String> ESTADOS_PEDIDO =
             List.of("nuevo", "en_preparacion", "listo", "entregado", "facturado", "cancelado");
+private static final List<String> ESTADOS_FACTURABLES = 
+            List.of("nuevo", "en_preparacion", "listo", "entregado");
 
     @Autowired private PedidoRepository pedidoRepository;
     @Autowired private ProductoRepository productoRepository;
@@ -154,6 +156,47 @@ private static final List<String> ESTADOS_DETALLE =
         return Map.of("mensaje", "Estado actualizado", "detalleId", detalleId, "estado", nuevoEstado);
     }
 
+    public CuentaMesaResponse obtenerCuentaMesa(Integer mesaId) {
+    Mesa mesa = mesaRepository.findById(mesaId)
+            .orElseThrow(() -> new IllegalArgumentException("Mesa no encontrada."));
+
+    List<Pedido> activos = pedidoRepository.findByMesa_Id(mesaId).stream()
+            .filter(p -> ESTADOS_FACTURABLES.contains(p.getEstado()))
+            .toList();
+
+    if (activos.isEmpty()) {
+        throw new IllegalArgumentException("La mesa no tiene pedidos pendientes de cobro.");
+    }
+
+        BigDecimal total = activos.stream()
+            .map(p -> p.getTotal() == null ? BigDecimal.ZERO : p.getTotal())
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+    List<PedidoDashboardResponse> pedidosDto = activos.stream()
+            .map(this::mapPedidoDashboard)
+            .toList();
+
+    return new CuentaMesaResponse(mesa.getId(), mesa.getCodigo(), total, pedidosDto);
+}
+
+public CuentaMesaResponse generarFactura(Integer mesaId) {
+    CuentaMesaResponse cuenta = obtenerCuentaMesa(mesaId); // valida y trae todo
+
+    List<Pedido> activos = pedidoRepository.findByMesa_Id(mesaId).stream()
+            .filter(p -> ESTADOS_FACTURABLES.contains(p.getEstado()))
+            .toList();
+
+    activos.forEach(p -> {
+        p.setEstado("facturado");
+        pedidoRepository.save(p);
+    });
+
+    Mesa mesa = mesaRepository.findById(mesaId).orElseThrow();
+    mesa.setEstado("libre");
+    mesaRepository.save(mesa);
+
+    return cuenta; // devuelve el detalle ya facturado, para imprimir
+}
     // ── Helpers ──
     private String normalizarTipo(String tipoPedido) {
         String tipo = tipoPedido == null ? "presencial" : tipoPedido.trim().toLowerCase();
