@@ -1,5 +1,3 @@
-
-
 const PRODUCTS_API_URL = `${API_BASE_URL}/productos`;
 const ORDERS_API_URL = `${API_BASE_URL}/pedidos`;
 const categoryConfig = {

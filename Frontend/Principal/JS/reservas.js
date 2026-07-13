@@ -135,9 +135,6 @@ const cargarEstadoMesas = async () => {
     renderMesas();
 };
 
-// ── Notificar a Gestión de Sala cuando se confirme una reserva ──
-// Si la página está dentro del iframe del Dashboard, notifica al padre.
-// Si está abierta directamente, notifica a cualquier ventana del mismo origen.
 function notificarReservaConfirmada(mesaId) {
     const msg = { type: "reserva_confirmada", mesaId };
 

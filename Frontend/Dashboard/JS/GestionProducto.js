@@ -1,8 +1,3 @@
-// ══════════════════════════════════════════════════════
-// CONFIG
-// ══════════════════════════════════════════════════════
-// resolveApiBaseUrl(), authHeaders(), API_BASE_URL vienen de api-config.js
-
 const API_PRODUCTOS   = `${API_BASE_URL}/productos`;
 const API_CATEGORIAS  = `${API_BASE_URL}/categorias`;
 const PAGE_SIZE       = 10;

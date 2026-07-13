@@ -1,10 +1,3 @@
-// ══════════════════════════════════════════════════════════
-//  ReporteVentas.js  —  Yaku Sabor
-//  Carpeta: Frontend/Dashboard/JS/
-//  Conecta con Spring Boot mediante la API configurada en runtime
-// ══════════════════════════════════════════════════════════
-// resolveApiBaseUrl(), authHeaders(), API_BASE_URL vienen de api-config.js
-
 // ── Formateadores ───────────────────────────────────────
 const fmt = (v) =>
   new Intl.NumberFormat("es-PE", {
@@ -27,10 +20,6 @@ function showToast(msg, duration = 2800) {
 //  DATOS — Carga real del backend + fallback de demo
 // ══════════════════════════════════════════════════════════
 
-/**
- * Intenta GET /api/pedidos y construye las métricas.
- * Si el backend está caído, usa datos de demostración para mayo 2025.
- */
 async function fetchReporteData() {
   try {
     const res = await fetch(`${API_BASE}/pedidos`, { headers: authHeaders() });

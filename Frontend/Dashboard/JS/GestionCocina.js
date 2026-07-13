@@ -1,15 +1,3 @@
-// ══════════════════════════════════════════════════════════
-//  GestionCocina.js  —  Yaku Sabor
-//  Carpeta: Frontend/Dashboard/JS/
-//
-//  CAMBIOS CLAVE:
-//  - Al hacer clic en "Entregado" o "Rechazar", el plato
-//    desaparece de la pantalla inmediatamente (optimistic UI).
-//  - Si todos los platos de una mesa son entregados/rechazados,
-//    la tarjeta de esa mesa también desaparece.
-// ══════════════════════════════════════════════════════════
-// resolveApiBaseUrl(), authHeaders(), API_BASE_URL vienen de api-config.js
-
 const PEDIDOS_URL = `${API_BASE_URL}/pedidos`;
 
 const mesasContainer = document.getElementById("mesasContainer");

@@ -28,7 +28,6 @@ public class PedidoController {
         return pedidoService.listarPedidos();
     }
 
-    // Pedidos históricos de una mesa puntual (para ver lo que se pidió en esa mesa)
     @GetMapping("/mesa/{mesaId}")
     public ResponseEntity<?> listarPedidosPorMesa(@PathVariable Integer mesaId) {
         try {
@@ -81,8 +80,6 @@ public class PedidoController {
         }
     }
 
-    // Cliente (rol Cliente) no tiene Usuario "mesero" válido para las reglas de mesa;
-    // en ese caso no se aplica la validación de "mesa asignada" (solo aplica a mozos/admin).
     private Usuario resolverActorOpcional(Principal principal) {
         if (principal == null || principal.getName() == null) return null;
         try {

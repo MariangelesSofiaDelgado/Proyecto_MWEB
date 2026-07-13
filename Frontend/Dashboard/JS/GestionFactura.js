@@ -112,9 +112,6 @@
             }
         }
 
-        // ── Cargar la cuenta consolidada de la mesa seleccionada ────
-        // silencioso = true: se usa para auto-refresco (no borra el formulario del
-        // modal ni parpadea la tabla con "Cargando…"), solo actualiza datos y estado.
         async function cargarCuenta(mesaId, silencioso = false) {
             if (!silencioso) {
                 ocultarEstado();
@@ -160,13 +157,6 @@
 
                 cuentaTotal.textContent = fmt(total);
 
-                // ── La factura se habilita cuando ya no queda NADA pendiente de resolver ──
-                // ★ FIX: antes se exigía que TODOS los platos, incluidos los "rechazados",
-                // tuvieran estadoDetalle === "entregado". Como un plato rechazado nunca pasa
-                // a "entregado", bastaba con que se rechazara un solo plato para dejar el
-                // botón "Generar Factura" deshabilitado para siempre en esa mesa.
-                // Ahora solo miramos los platos que aún NO están resueltos (ni entregados
-                // ni rechazados); si no queda ninguno pendiente, se habilita la factura.
                 const pendientes = filas.filter(
                     d => d.estadoDetalle !== "entregado" && d.estadoDetalle !== "rechazado"
                 );
@@ -306,20 +296,11 @@
 
         document.getElementById("btnRefrescarMesas").addEventListener("click", async () => {
             await cargarMesasOcupadas();
-            // ★ FIX: si ya había una mesa seleccionada, hay que volver a pedir SU cuenta,
-            // porque el <select> no dispara "change" al re-seleccionar el mismo valor,
-            // y por eso el botón "Generar Factura" quedaba congelado con el estado viejo
-            // aunque en cocina ya se marcara el plato como "entregado".
             if (selectMesa.value) {
                 await cargarCuenta(selectMesa.value);
             }
         });
 
-        // ★ FIX: auto-refresco silencioso de la cuenta de la mesa seleccionada, igual
-        // que hace GestionCocina.js con los pedidos. Así el botón "Generar Factura" se
-        // habilita solo apenas cocina marca el último plato como "entregado", sin que
-        // el usuario tenga que tocar nada. Se omite mientras el modal está abierto para
-        // no pisar los datos que el cajero está llenando (RUC, DNI, etc.).
         setInterval(() => {
             const modalAbierto = modalFacturaEl.classList.contains("show");
             if (selectMesa.value && !modalAbierto) {
