@@ -1,9 +1,3 @@
-
-// ==========================================
-// LÓGICA DE SESIÓN Y FORMULARIOS (LOGIN/REGISTRO)
-// ==========================================
-// authHeaders(), resolveApiBaseUrl(), API_BASE_URL vienen de api-config.js
-// clearSession() también viene de api-config.js
 document.addEventListener("DOMContentLoaded", () => {
     const publicHomePath = "../../Principal/HTML/index.html";
 

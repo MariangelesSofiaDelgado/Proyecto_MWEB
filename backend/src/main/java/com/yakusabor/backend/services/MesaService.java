@@ -88,16 +88,6 @@ public class MesaService {
         return toResponse(mesaRepository.save(mesa));
     }
 
-    /**
-     * Asigna (o libera) el mozo responsable de una mesa.
-     *
-     * - Un ADMINISTRADOR puede asignar cualquier mozo a cualquier mesa (o liberarla, enviando meseroId=null).
-     * - Un MESERO solo puede:
-     *      a) tomar una mesa que no tiene mozo asignado (para "elegir qué mesa atender"), o
-     *      b) liberar la mesa que él mismo tiene asignada.
-     *   No puede asignarse una mesa que ya está siendo atendida por otro mozo,
-     *   ni asignar la mesa a un tercero.
-     */
     public MesaEstadoResponse asignarMesero(Integer mesaId, Integer meseroIdSolicitado, Usuario actor) {
         Mesa mesa = mesaRepository.findById(mesaId)
                 .orElseThrow(() -> new IllegalArgumentException("Mesa no encontrada."));

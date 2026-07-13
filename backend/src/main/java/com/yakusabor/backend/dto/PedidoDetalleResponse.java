@@ -13,6 +13,6 @@ public class PedidoDetalleResponse {
     private Integer cantidad;
     private BigDecimal precioUnitario;
     private String notas;
-    private Integer detalleId;       // <-- NUEVO: ID del detalle para actualizarlo
-    private String estadoDetalle;    // <-- NUEVO: estado individual del plato
+    private Integer detalleId;   
+    private String estadoDetalle;  
 }

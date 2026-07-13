@@ -53,7 +53,6 @@ public class TareaController {
         return tareaRepository.save(tarea);
     }
 
-    // Admin ve el historial completo de un mozo (opcional)
     @GetMapping("/mesero/{meseroId}")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'Administrador', 'administrador')")
     public List<Tarea> historialMesero(@PathVariable Integer meseroId) {

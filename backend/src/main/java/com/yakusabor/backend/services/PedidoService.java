@@ -45,9 +45,6 @@ private static final List<String> ESTADOS_FACTURABLES =
                 .toList();
     }
 
-    // Historial completo de pedidos de una mesa (cualquier estado).
-    // Cualquier usuario autenticado del staff puede VER esto (mozos ven todas las mesas),
-    // la restricción de "atender/cobrar" se aplica solo al crear/actualizar/facturar.
     public List<PedidoDashboardResponse> listarPedidosPorMesa(Integer mesaId) {
         if (!mesaRepository.existsById(mesaId)) {
             throw new IllegalArgumentException("Mesa no encontrada.");
@@ -78,9 +75,6 @@ private static final List<String> ESTADOS_FACTURABLES =
             mesa = mesaRepository.findById(mesaId)
                     .orElseThrow(() -> new IllegalArgumentException("La mesa seleccionada no existe."));
 
-            // Un mozo solo puede enviar pedidos a mesas que él atiende.
-            // Si la mesa todavía no tiene mozo asignado, se la auto-asigna (equivale a "elegir atenderla").
-            // Esto NO aplica a Clientes (piden desde la carta pública) ni a Cocineros.
             if (esMesero(actor)) {
                 if (mesa.getMesero() == null) {
                     mesa.setMesero(actor);
@@ -102,10 +96,6 @@ private static final List<String> ESTADOS_FACTURABLES =
             pedido.setDireccionDelivery(direccion);
         }
 
-        // El mesero del pedido se determina así:
-        //  - Si quien crea el pedido es un mozo, el pedido queda a su nombre (no confiamos en el body).
-        //  - Si es un administrador o un cliente/cocinero, se respeta el mozo asignado a la mesa (si existe)
-        //    o el meseroId enviado explícitamente en el body.
         if (esMesero(actor)) {
             pedido.setMesero(actor);
         } else if (mesa != null && mesa.getMesero() != null) {
@@ -242,10 +232,6 @@ public CuentaMesaResponse generarFactura(Integer mesaId, Usuario actor) {
     return cuenta; // devuelve el detalle ya facturado, para imprimir
 }
 
-    // ── Control de acceso por mesa ──
-    // Un ADMINISTRADOR puede atender/cobrar cualquier mesa.
-    // Un MOZO solo puede atender/cobrar la mesa que tiene asignada a su nombre.
-    // Otros roles (Cliente, Cocinero) no están sujetos a esta regla.
     private void verificarPermisoSobreMesa(Mesa mesa, Usuario actor) {
         if (mesa == null || actor == null) return;
         if (!esMesero(actor)) return; // solo restringe a mozos
