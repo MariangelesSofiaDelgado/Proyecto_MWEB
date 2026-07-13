@@ -48,7 +48,8 @@ public class SecurityConfig {
 
                         // ── Mesas: lectura pública (el cliente necesita verlas al pedir) ──
                         // Incluye /api/mesas/{id}/pedidos, así cualquier mozo puede VER todas
-                        // las mesas con sus pedidos, aunque solo pueda operar la suya (se valida en el servicio).
+                        // las mesas con sus pedidos, aunque solo pueda operar la suya (se valida en el
+                        // servicio).
                         .requestMatchers(HttpMethod.GET, "/api/mesas/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/mesas/**")
                         .hasAnyRole("MESERO", "Mesero", "mesero", "ADMINISTRADOR", "Administrador", "administrador")
@@ -58,11 +59,14 @@ public class SecurityConfig {
 
                         // ── Pedidos ──
                         .requestMatchers(HttpMethod.POST, "/api/pedidos/**")
-                        .hasAnyRole("MESERO", "Mesero", "mesero", "ADMINISTRADOR", "Administrador", "administrador", "CLIENTE", "Cliente", "cliente")
+                        .hasAnyRole("MESERO", "Mesero", "mesero", "ADMINISTRADOR", "Administrador", "administrador",
+                                "CLIENTE", "Cliente", "cliente")
                         .requestMatchers(HttpMethod.GET, "/api/pedidos/**")
-                        .hasAnyRole("MESERO", "Mesero", "mesero", "ADMINISTRADOR", "Administrador", "administrador", "COCINERO", "Cocinero", "cocinero")
+                        .hasAnyRole("MESERO", "Mesero", "mesero", "ADMINISTRADOR", "Administrador", "administrador",
+                                "COCINERO", "Cocinero", "cocinero")
                         .requestMatchers(HttpMethod.PUT, "/api/pedidos/*/detalles/*/estado")
-                        .hasAnyRole("COCINERO", "Cocinero", "cocinero", "ADMINISTRADOR", "Administrador", "administrador")
+                        .hasAnyRole("COCINERO", "Cocinero", "cocinero", "ADMINISTRADOR", "Administrador",
+                                "administrador")
 
                         // ── Facturas (cobrar) ──
                         .requestMatchers(HttpMethod.POST, "/api/facturas/**")
@@ -70,9 +74,11 @@ public class SecurityConfig {
 
                         // ── Productos ──
                         .requestMatchers(HttpMethod.POST, "/api/productos/**")
-                        .hasAnyRole("ADMINISTRADOR", "Administrador", "administrador", "COCINERO", "Cocinero", "cocinero")
+                        .hasAnyRole("ADMINISTRADOR", "Administrador", "administrador", "COCINERO", "Cocinero",
+                                "cocinero")
                         .requestMatchers(HttpMethod.PUT, "/api/productos/**")
-                        .hasAnyRole("ADMINISTRADOR", "Administrador", "administrador", "COCINERO", "Cocinero", "cocinero")
+                        .hasAnyRole("ADMINISTRADOR", "Administrador", "administrador", "COCINERO", "Cocinero",
+                                "cocinero")
                         .requestMatchers(HttpMethod.DELETE, "/api/productos/**").hasAnyRole(ROLES_ADMIN)
 
                         // ── Mozos ──
@@ -100,7 +106,8 @@ public class SecurityConfig {
                 "https://localhost:*",
                 "https://127.0.0.1:*",
                 "https://*.app.github.dev",
-                "https://*.githubpreview.dev"));
+                "https://*.githubpreview.dev",
+                "https://yakusabor-frontend.onrender.com"));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(Arrays.asList("*"));
         config.setAllowCredentials(true);
