@@ -1,0 +1,331 @@
+package com.yakusabor.backend.services;
+
+import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.yakusabor.backend.dto.PedidoDashboardResponse;
+import com.yakusabor.backend.dto.PedidoDetalleResponse;
+import com.yakusabor.backend.dto.PedidoResponse;
+import com.yakusabor.backend.models.Mesa;
+import com.yakusabor.backend.models.Pedido;
+import com.yakusabor.backend.models.PedidoDetalle;
+import com.yakusabor.backend.models.Producto;
+import com.yakusabor.backend.models.Usuario;
+import com.yakusabor.backend.repositories.MesaRepository;
+import com.yakusabor.backend.repositories.PedidoRepository;
+import com.yakusabor.backend.repositories.ProductoRepository;
+import com.yakusabor.backend.repositories.UsuarioRepository;
+import com.yakusabor.backend.dto.CuentaMesaResponse;
+
+@Service
+public class PedidoService {
+
+private static final List<String> ESTADOS_DETALLE =
+            List.of("pendiente", "en_preparacion", "listo", "entregado", "rechazado");
+    private static final List<String> ESTADOS_PEDIDO =
+            List.of("nuevo", "en_preparacion", "listo", "entregado", "facturado", "cancelado");
+private static final List<String> ESTADOS_FACTURABLES = 
+            List.of("nuevo", "en_preparacion", "listo", "entregado");
+
+    @Autowired private PedidoRepository pedidoRepository;
+    @Autowired private ProductoRepository productoRepository;
+    @Autowired private MesaRepository mesaRepository;
+    @Autowired private UsuarioRepository usuarioRepository;
+
+    public List<PedidoDashboardResponse> listarPedidos() {
+        return pedidoRepository.findAll().stream()
+                .sorted(Comparator.comparing(Pedido::getCreatedAt).reversed())
+                .map(this::mapPedidoDashboard)
+                .toList();
+    }
+
+    // Historial completo de pedidos de una mesa (cualquier estado).
+    // Cualquier usuario autenticado del staff puede VER esto (mozos ven todas las mesas),
+    // la restricción de "atender/cobrar" se aplica solo al crear/actualizar/facturar.
+    public List<PedidoDashboardResponse> listarPedidosPorMesa(Integer mesaId) {
+        if (!mesaRepository.existsById(mesaId)) {
+            throw new IllegalArgumentException("Mesa no encontrada.");
+        }
+        return pedidoRepository.findByMesa_Id(mesaId).stream()
+                .sorted(Comparator.comparing(Pedido::getCreatedAt).reversed())
+                .map(this::mapPedidoDashboard)
+                .toList();
+    }
+
+    public PedidoResponse crearPedido(Map<String, Object> request, Usuario actor) {
+        List<Map<String, Object>> items = getItems(request);
+        if (items.isEmpty()) {
+            throw new IllegalArgumentException("El pedido debe tener al menos un producto.");
+        }
+
+        String tipo = normalizarTipo(getString(request, "tipoPedido", "tipo_pedido", "tipo"));
+        Pedido pedido = new Pedido();
+        pedido.setTipo(tipo);
+        pedido.setEstado("nuevo");
+
+        Mesa mesa = null;
+        if ("presencial".equals(tipo)) {
+            Integer mesaId = getInteger(request, "mesaId", "mesa_id");
+            if (mesaId == null) {
+                throw new IllegalArgumentException("Debes seleccionar una mesa para pedidos presenciales.");
+            }
+            mesa = mesaRepository.findById(mesaId)
+                    .orElseThrow(() -> new IllegalArgumentException("La mesa seleccionada no existe."));
+
+            // Un mozo solo puede enviar pedidos a mesas que él atiende.
+            // Si la mesa todavía no tiene mozo asignado, se la auto-asigna (equivale a "elegir atenderla").
+            // Esto NO aplica a Clientes (piden desde la carta pública) ni a Cocineros.
+            if (esMesero(actor)) {
+                if (mesa.getMesero() == null) {
+                    mesa.setMesero(actor);
+                } else if (!mesa.getMesero().getId().equals(actor.getId())) {
+                    throw new IllegalArgumentException(
+                            "Esta mesa está siendo atendida por " + mesa.getMesero().getNombre()
+                                    + ". Solo puedes enviar pedidos a mesas asignadas a ti.");
+                }
+            }
+
+            mesa.setEstado("ocupada");
+            mesaRepository.save(mesa);
+            pedido.setMesa(mesa);
+        } else {
+            String direccion = getString(request, "direccion", "direccionDelivery", "direccion_delivery");
+            if (direccion.isEmpty()) {
+                throw new IllegalArgumentException("Debes ingresar una dirección para delivery.");
+            }
+            pedido.setDireccionDelivery(direccion);
+        }
+
+        // El mesero del pedido se determina así:
+        //  - Si quien crea el pedido es un mozo, el pedido queda a su nombre (no confiamos en el body).
+        //  - Si es un administrador o un cliente/cocinero, se respeta el mozo asignado a la mesa (si existe)
+        //    o el meseroId enviado explícitamente en el body.
+        if (esMesero(actor)) {
+            pedido.setMesero(actor);
+        } else if (mesa != null && mesa.getMesero() != null) {
+            pedido.setMesero(mesa.getMesero());
+        } else {
+            Integer meseroId = getInteger(request, "meseroId", "mesero_id");
+            if (meseroId != null) {
+                Usuario mesero = usuarioRepository.findById(meseroId)
+                        .orElseThrow(() -> new IllegalArgumentException("El mesero seleccionado no existe."));
+                pedido.setMesero(mesero);
+            }
+        }
+
+        BigDecimal totalCalculado = BigDecimal.ZERO;
+        for (Map<String, Object> itemRequest : items) {
+            Integer productoId = getInteger(itemRequest, "productoId", "producto_id");
+            if (productoId == null) {
+                throw new IllegalArgumentException("Cada detalle debe incluir un producto.");
+            }
+
+            Integer cantidadValue = getInteger(itemRequest, "cantidad");
+            int cantidad = cantidadValue == null ? 1 : cantidadValue;
+            if (cantidad <= 0) {
+                throw new IllegalArgumentException("La cantidad debe ser mayor que cero.");
+            }
+
+            Producto producto = productoRepository.findById(productoId)
+                    .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado: " + productoId));
+
+            if (!Boolean.TRUE.equals(producto.getDisponible())) {
+                throw new IllegalArgumentException("El producto no está disponible: " + producto.getNombre());
+            }
+
+            BigDecimal precioUnitario = getBigDecimal(itemRequest, "precioUnitario", "precio_unitario");
+            precioUnitario = precioUnitario != null ? precioUnitario : BigDecimal.valueOf(producto.getPrecio());
+
+            PedidoDetalle detalle = new PedidoDetalle();
+            detalle.setProducto(producto);
+            detalle.setCantidad(cantidad);
+            detalle.setPrecioUnitario(precioUnitario);
+            detalle.setNotas(getString(itemRequest, "notas"));
+            pedido.agregarDetalle(detalle);
+
+            totalCalculado = totalCalculado.add(precioUnitario.multiply(BigDecimal.valueOf(cantidad)));
+        }
+
+        pedido.setTotal(totalCalculado);
+        Pedido guardado = pedidoRepository.save(pedido);
+
+        return new PedidoResponse(guardado.getId(), guardado.getTipo(), guardado.getEstado(),
+                guardado.getTotal(), guardado.getCreatedAt(), "Pedido registrado correctamente.");
+    }
+
+    public PedidoDashboardResponse actualizarEstado(Integer id, String estadoSolicitado, Usuario actor) {
+        Pedido pedido = pedidoRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("El pedido seleccionado no existe."));
+
+        verificarPermisoSobreMesa(pedido.getMesa(), actor);
+
+        String nuevoEstado = normalizarEstado(estadoSolicitado);
+        pedido.setEstado(nuevoEstado);
+
+        if (pedido.getMesa() != null
+                && ("entregado".equals(nuevoEstado) || "cancelado".equals(nuevoEstado) || "facturado".equals(nuevoEstado))) {
+            pedido.getMesa().setEstado("libre");
+        }
+
+        return mapPedidoDashboard(pedidoRepository.save(pedido));
+    }
+
+    public Map<String, Object> actualizarEstadoDetalle(Integer pedidoId, Integer detalleId, String estadoSolicitado) {
+        Pedido pedido = pedidoRepository.findById(pedidoId)
+                .orElseThrow(() -> new IllegalArgumentException("Pedido no encontrado."));
+
+        PedidoDetalle detalle = pedido.getDetalles().stream()
+                .filter(d -> d.getId().equals(detalleId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Detalle no encontrado."));
+
+        String nuevoEstado = estadoSolicitado.trim().toLowerCase();
+        if (!ESTADOS_DETALLE.contains(nuevoEstado)) {
+            throw new IllegalArgumentException("Estado inválido.");
+        }
+
+        detalle.setEstadoDetalle(nuevoEstado);
+        pedidoRepository.save(pedido);
+
+        return Map.of("mensaje", "Estado actualizado", "detalleId", detalleId, "estado", nuevoEstado);
+    }
+
+    public CuentaMesaResponse obtenerCuentaMesa(Integer mesaId) {
+    Mesa mesa = mesaRepository.findById(mesaId)
+            .orElseThrow(() -> new IllegalArgumentException("Mesa no encontrada."));
+
+    List<Pedido> activos = pedidoRepository.findByMesa_Id(mesaId).stream()
+            .filter(p -> ESTADOS_FACTURABLES.contains(p.getEstado()))
+            .toList();
+
+    if (activos.isEmpty()) {
+        throw new IllegalArgumentException("La mesa no tiene pedidos pendientes de cobro.");
+    }
+
+        BigDecimal total = activos.stream()
+            .map(p -> p.getTotal() == null ? BigDecimal.ZERO : p.getTotal())
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+    List<PedidoDashboardResponse> pedidosDto = activos.stream()
+            .map(this::mapPedidoDashboard)
+            .toList();
+
+    return new CuentaMesaResponse(mesa.getId(), mesa.getCodigo(), total, pedidosDto);
+}
+
+public CuentaMesaResponse generarFactura(Integer mesaId, Usuario actor) {
+    Mesa mesa = mesaRepository.findById(mesaId)
+            .orElseThrow(() -> new IllegalArgumentException("Mesa no encontrada."));
+    verificarPermisoSobreMesa(mesa, actor);
+
+    CuentaMesaResponse cuenta = obtenerCuentaMesa(mesaId); // valida y trae todo
+
+    List<Pedido> activos = pedidoRepository.findByMesa_Id(mesaId).stream()
+            .filter(p -> ESTADOS_FACTURABLES.contains(p.getEstado()))
+            .toList();
+
+    activos.forEach(p -> {
+        p.setEstado("facturado");
+        pedidoRepository.save(p);
+    });
+
+    mesa.setEstado("libre");
+    mesa.setMesero(null); // al cobrar, la mesa queda libre para que cualquier mozo la tome de nuevo
+    mesaRepository.save(mesa);
+
+    return cuenta; // devuelve el detalle ya facturado, para imprimir
+}
+
+    // ── Control de acceso por mesa ──
+    // Un ADMINISTRADOR puede atender/cobrar cualquier mesa.
+    // Un MOZO solo puede atender/cobrar la mesa que tiene asignada a su nombre.
+    // Otros roles (Cliente, Cocinero) no están sujetos a esta regla.
+    private void verificarPermisoSobreMesa(Mesa mesa, Usuario actor) {
+        if (mesa == null || actor == null) return;
+        if (!esMesero(actor)) return; // solo restringe a mozos
+
+        if (mesa.getMesero() == null || !mesa.getMesero().getId().equals(actor.getId())) {
+            throw new IllegalArgumentException(
+                    "No tienes esta mesa asignada. Debes atenderla primero desde Gestión de Sala.");
+        }
+    }
+
+    private boolean esMesero(Usuario usuario) {
+        return usuario != null && usuario.getRol() != null
+                && "mesero".equalsIgnoreCase(usuario.getRol().getNombre());
+    }
+
+    // ── Helpers ──
+    private String normalizarTipo(String tipoPedido) {
+        String tipo = tipoPedido == null ? "presencial" : tipoPedido.trim().toLowerCase();
+        if (!"presencial".equals(tipo) && !"delivery".equals(tipo)) {
+            throw new IllegalArgumentException("Tipo de pedido inválido.");
+        }
+        return tipo;
+    }
+
+    private String normalizarEstado(String estadoPedido) {
+        String estado = estadoPedido == null ? "" : estadoPedido.trim().toLowerCase();
+        if (!ESTADOS_PEDIDO.contains(estado)) {
+            throw new IllegalArgumentException("Estado de pedido inválido.");
+        }
+        return estado;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Map<String, Object>> getItems(Map<String, Object> request) {
+        Object value = request.get("items");
+        return value instanceof List<?> ? (List<Map<String, Object>>) value : Collections.emptyList();
+    }
+
+    private String getString(Map<String, Object> source, String... keys) {
+        for (String key : keys) {
+            Object value = source.get(key);
+            if (value != null) return String.valueOf(value).trim();
+        }
+        return "";
+    }
+
+    private Integer getInteger(Map<String, Object> source, String... keys) {
+        for (String key : keys) {
+            Object value = source.get(key);
+            if (value instanceof Number number) return number.intValue();
+            if (value != null && !String.valueOf(value).trim().isEmpty()) return Integer.parseInt(String.valueOf(value).trim());
+        }
+        return null;
+    }
+
+    private BigDecimal getBigDecimal(Map<String, Object> source, String... keys) {
+        for (String key : keys) {
+            Object value = source.get(key);
+            if (value instanceof Number number) return BigDecimal.valueOf(number.doubleValue());
+            if (value != null && !String.valueOf(value).trim().isEmpty()) return new BigDecimal(String.valueOf(value).trim());
+        }
+        return null;
+    }
+
+    private PedidoDashboardResponse mapPedidoDashboard(Pedido pedido) {
+        List<PedidoDetalleResponse> detalles = pedido.getDetalles().stream()
+                .map(d -> new PedidoDetalleResponse(
+                        d.getProducto().getId(), d.getProducto().getNombre(), d.getCantidad(),
+                        d.getPrecioUnitario(), d.getNotas(), d.getId(), d.getEstadoDetalle()))
+                .toList();
+
+        Mesa mesa = pedido.getMesa();
+        Usuario mesero = pedido.getMesero();
+
+        return new PedidoDashboardResponse(
+                pedido.getId(), pedido.getTipo(), pedido.getEstado(), pedido.getTotal(), pedido.getCreatedAt(),
+                mesa != null ? mesa.getId() : null, mesa != null ? mesa.getCodigo() : null,
+                pedido.getDireccionDelivery(), detalles,
+                mesero != null ? mesero.getId() : null,
+                mesero != null ? mesero.getNombre() : null,
+                mesero != null ? mesero.getTurno() : null);
+    }
+}

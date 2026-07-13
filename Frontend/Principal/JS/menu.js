@@ -1,19 +1,5 @@
-const resolveApiBaseUrl = () => {
-    const override = window.__API_BASE_URL__ || localStorage.getItem("apiBaseUrl");
-    if (override) {
-        return override.replace(/\/$/, "");
-    }
 
-    const { origin, hostname, protocol } = window.location;
 
-    if (hostname.endsWith(".app.github.dev") || hostname.endsWith(".githubpreview.dev")) {
-        return origin.replace(/-(\d+)\.app\.github\.dev$/, "-8080.app.github.dev").replace(/-(\d+)\.githubpreview\.dev$/, "-8080.githubpreview.dev") + "/api";
-    }
-
-    return `${protocol}//${hostname}:8080/api`;
-};
-
-const API_BASE_URL = resolveApiBaseUrl();
 const PRODUCTS_API_URL = `${API_BASE_URL}/productos`;
 const ORDERS_API_URL = `${API_BASE_URL}/pedidos`;
 const categoryConfig = {
@@ -282,7 +268,7 @@ if (submitOrderButton) {
             return;
         }
         
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         if (!token) {
             alert("Por favor, inicia sesión para realizar un pedido.");
             return;

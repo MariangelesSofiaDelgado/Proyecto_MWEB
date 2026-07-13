@@ -1,34 +1,11 @@
 // ══════════════════════════════════════════════════════
 // CONFIG
 // ══════════════════════════════════════════════════════
-const resolveApiBaseUrl = () => {
-  const override = window.__API_BASE_URL__ || localStorage.getItem("apiBaseUrl");
-  if (override) {
-    return override.replace(/\/$/, "");
-  }
+// resolveApiBaseUrl(), authHeaders(), API_BASE_URL vienen de api-config.js
 
-  const { origin, hostname, protocol } = window.location;
-
-  if (hostname.endsWith(".app.github.dev") || hostname.endsWith(".githubpreview.dev")) {
-    return origin.replace(/-(\d+)\.app\.github\.dev$/, "-8080.app.github.dev").replace(/-(\d+)\.githubpreview\.dev$/, "-8080.githubpreview.dev") + "/api";
-  }
-
-  return `${protocol}//${hostname}:8080/api`;
-};
-
-const API_BASE       = resolveApiBaseUrl();
-const API_PRODUCTOS   = `${API_BASE}/productos`;
-const API_CATEGORIAS  = `${API_BASE}/categorias`;
+const API_PRODUCTOS   = `${API_BASE_URL}/productos`;
+const API_CATEGORIAS  = `${API_BASE_URL}/categorias`;
 const PAGE_SIZE       = 10;
- 
-// ── Helpers ────────────────────────────────────────────
-const authHeaders = () => {
-  const token = localStorage.getItem("token");
-  return {
-    "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {})
-  };
-};
  
 const esc = v => String(v ?? "")
   .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")

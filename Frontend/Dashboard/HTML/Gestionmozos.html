@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -223,6 +224,14 @@
                 <label>Contraseña *</label>
                 <input type="password" id="inPassword" placeholder="Mínimo 6 caracteres" />
             </div>
+            <div class="gm-field">
+                <label>Turno *</label>
+                <select id="inTurno">
+                    <option value="Mañana">Mañana</option>
+                    <option value="Tarde" selected>Tarde</option>
+                    <option value="Noche">Noche</option>
+                </select>
+            </div>
             <div class="gm-error" id="modalError">Error al agregar el mozo.</div>
         </div>
         <div class="gm-modal-footer">
@@ -260,7 +269,7 @@ const COLORES = ['#1b3a57','#2f5b84','#e07b00','#16a34a','#7c3aed','#dc2626','#0
 
 // ── Auth helpers ─────────────────────────────────
 function authHeaders() {
-    const t = localStorage.getItem('token');
+    const t = sessionStorage.getItem('token');
     return { 'Content-Type':'application/json', ...(t ? {Authorization:`Bearer ${t}`} : {}) };
 }
 
@@ -348,7 +357,7 @@ function renderTabla(filtro = '') {
                 <strong>${fmt(m.ventasDia||0)}</strong>
                 <span class="pct-badge">${pct}%</span>
             </td>
-            <td>${m.mesas||0}</td>
+            <td>${m.mesas||0} <span style="color:#94a3b8;font-size:.75rem">· ${esc(m.turno||'—')}</span></td>
             <td>${fmt(m.promedio||0)}</td>
             <td>
                 <span class="${activo?'badge-activo':'badge-inactivo'}">
@@ -412,6 +421,7 @@ function limpiarModal() {
     document.getElementById('inNombre').value   = '';
     document.getElementById('inEmail').value    = '';
     document.getElementById('inPassword').value = '';
+    document.getElementById('inTurno').value    = 'Tarde';
     ocultarErrorModal();
 }
 function mostrarErrorModal(msg) {
@@ -427,6 +437,7 @@ document.getElementById('modalSave').addEventListener('click', async () => {
     const nombre   = document.getElementById('inNombre').value.trim();
     const email    = document.getElementById('inEmail').value.trim();
     const password = document.getElementById('inPassword').value.trim();
+    const turno    = document.getElementById('inTurno').value;
 
     ocultarErrorModal();
 
@@ -443,7 +454,7 @@ document.getElementById('modalSave').addEventListener('click', async () => {
         const res = await fetch(API, {
             method: 'POST',
             headers: authHeaders(),
-            body: JSON.stringify({ nombre, email, password })
+            body: JSON.stringify({ nombre, email, password, turno })
         });
 
         const data = await res.text();

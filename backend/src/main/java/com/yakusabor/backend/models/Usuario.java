@@ -38,6 +38,9 @@ public class Usuario {
     @Column(nullable = false)
     private Boolean activo = true;
 
+    @Column(nullable = false, length = 20)
+    private String turno = "Tarde";
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 

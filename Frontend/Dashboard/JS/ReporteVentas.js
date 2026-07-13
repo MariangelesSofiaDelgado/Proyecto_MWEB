@@ -3,32 +3,7 @@
 //  Carpeta: Frontend/Dashboard/JS/
 //  Conecta con Spring Boot mediante la API configurada en runtime
 // ══════════════════════════════════════════════════════════
-
-const resolveApiBaseUrl = () => {
-  const override = window.__API_BASE_URL__ || localStorage.getItem("apiBaseUrl");
-  if (override) {
-    return override.replace(/\/$/, "");
-  }
-
-  const { origin, hostname, protocol } = window.location;
-
-  if (hostname.endsWith(".app.github.dev") || hostname.endsWith(".githubpreview.dev")) {
-    return origin.replace(/-(\d+)\.app\.github\.dev$/, "-8080.app.github.dev").replace(/-(\d+)\.githubpreview\.dev$/, "-8080.githubpreview.dev") + "/api";
-  }
-
-  return `${protocol}//${hostname}:8080/api`;
-};
-
-const API_BASE = resolveApiBaseUrl();
-
-// ── Auth helper ─────────────────────────────────────────
-function authHeaders() {
-  const token = localStorage.getItem("token");
-  return {
-    "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
-}
+// resolveApiBaseUrl(), authHeaders(), API_BASE_URL vienen de api-config.js
 
 // ── Formateadores ───────────────────────────────────────
 const fmt = (v) =>
