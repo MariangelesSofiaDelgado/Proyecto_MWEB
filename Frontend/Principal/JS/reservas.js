@@ -1,3 +1,4 @@
+
 const TOTAL_MESAS_MOCK = 4;
 
 const API_CONFIG = {
@@ -156,7 +157,7 @@ if (reservaModal && mesasGrid && mesaSeleccionadaTexto && confirmarReservaBtn) {
     reservaModal.addEventListener("show.bs.modal", cargarEstadoMesas);
 
     confirmarReservaBtn.addEventListener("click", async () => {
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         if (!token) {
             mostrarFeedback("Debes iniciar sesión para realizar una reserva.", "warning");
             return;

@@ -1,3 +1,4 @@
+
 // ==========================================
 // LÓGICA DE SESIÓN Y FORMULARIOS (LOGIN/REGISTRO)
 // ==========================================
@@ -7,17 +8,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const publicHomePath = "../../Principal/HTML/index.html";
 
     const clearSession = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("rol");
-        localStorage.removeItem("nombre");
+        sessionStorage.removeItem("token");
+        sessionStorage.removeItem("rol");
+        sessionStorage.removeItem("nombre");
     };
 
     const setupPublicSessionUI = () => {
         const navSessionButton = document.querySelector(".nav-register-btn");
         if (!navSessionButton) return;
 
-        const token = localStorage.getItem("token");
-        const nombre = localStorage.getItem("nombre");
+        const token = sessionStorage.getItem("token");
+        const nombre = sessionStorage.getItem("nombre");
         const label = navSessionButton.querySelector("span");
 
         if (!token) {
@@ -103,9 +104,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (response.ok) {
                     const data = await response.json();
 
-                    localStorage.setItem("token", data.token);
-                    localStorage.setItem("rol", data.rol);
-                    localStorage.setItem("nombre", data.nombre);
+                    sessionStorage.setItem("token", data.token);
+                    sessionStorage.setItem("rol", data.rol);
+                    sessionStorage.setItem("nombre", data.nombre);
                     setupPublicSessionUI();
 
                     alert(`¡Bienvenido/a, ${data.nombre}!`);
@@ -183,3 +184,4 @@ document.addEventListener("DOMContentLoaded", () => {
     // Inicializar UI al cargar la página
     setupPublicSessionUI();
 });
+

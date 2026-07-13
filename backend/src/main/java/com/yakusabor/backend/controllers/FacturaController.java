@@ -1,9 +1,12 @@
 package com.yakusabor.backend.controllers;
 
+import java.security.Principal;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.yakusabor.backend.models.Usuario;
+import com.yakusabor.backend.services.AuthService;
 import com.yakusabor.backend.services.PedidoService;
 
 @RestController
@@ -11,12 +14,14 @@ import com.yakusabor.backend.services.PedidoService;
 public class FacturaController {
 
     @Autowired private PedidoService pedidoService;
+    @Autowired private AuthService authService;
 
     @PostMapping
-    public ResponseEntity<?> generarFactura(@RequestBody Map<String, Object> body) {
+    public ResponseEntity<?> generarFactura(@RequestBody Map<String, Object> body, Principal principal) {
         try {
             Integer mesaId = Integer.parseInt(String.valueOf(body.get("mesaId")));
-            return ResponseEntity.ok(pedidoService.generarFactura(mesaId));
+            Usuario actor = authService.obtenerUsuarioActual(principal);
+            return ResponseEntity.ok(pedidoService.generarFactura(mesaId, actor));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {

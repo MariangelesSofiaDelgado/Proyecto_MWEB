@@ -33,12 +33,21 @@ public class AuthService {
 
         String rolNombre = usuario.getRol().getNombre();
         String token = jwtUtil.generarToken(usuario.getEmail(), rolNombre);
-        return new AuthResponse(token, usuario.getNombre(), rolNombre);
+        return new AuthResponse(usuario.getId(), token, usuario.getNombre(), rolNombre);
     }
 
     public Usuario obtenerUsuarioPorEmail(String email) {
         return usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+    }
+
+    // Atajo usado por otros servicios para resolver el usuario logueado
+    // a partir del "principal" (email) que deja el JwtFilter en el SecurityContext.
+    public Usuario obtenerUsuarioActual(java.security.Principal principal) {
+        if (principal == null || principal.getName() == null) {
+            throw new IllegalArgumentException("No autenticado");
+        }
+        return obtenerUsuarioPorEmail(principal.getName());
     }
 
     public void registrar(RegistroRequest request) {

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 
@@ -110,7 +111,7 @@
         const dashboardUserRole = document.getElementById('dashboardUserRole');
         const dashboardLogoutBtn = document.getElementById('dashboardLogoutBtn');
 
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
         if (!token) {
             window.location.href = '../../Principal/HTML/index.html';
         }
@@ -121,9 +122,9 @@
         });
 
         const redirectToPublic = () => {
-            localStorage.removeItem('token');
-            localStorage.removeItem('rol');
-            localStorage.removeItem('nombre');
+            sessionStorage.removeItem('token');
+            sessionStorage.removeItem('rol');
+            sessionStorage.removeItem('nombre');
             window.location.href = '../../Principal/HTML/index.html';
         };
 
@@ -136,8 +137,8 @@
                 const nombre = data.nombre || 'Usuario';
                 const rol = data.rol || 'Sin rol';
 
-                localStorage.setItem('rol', rol);
-                localStorage.setItem('nombre', nombre);
+                sessionStorage.setItem('rol', rol);
+                sessionStorage.setItem('nombre', nombre);
 
                 dashboardUserName.textContent = nombre;
                 dashboardUserRole.textContent = rol;
@@ -247,8 +248,8 @@
 
         // ── Al cerrar sesión, quitar al mesero del registro ───────────────
         dashboardLogoutBtn.addEventListener('click', () => {
-            const nombre = localStorage.getItem('nombre');
-            const rol    = localStorage.getItem('rol') || '';
+            const nombre = sessionStorage.getItem('nombre');
+            const rol    = sessionStorage.getItem('rol') || '';
             if (rol.trim().toUpperCase() === 'MESERO' && nombre) {
                 try {
                     const KEY = 'mozos_activos';
@@ -258,9 +259,9 @@
                     localStorage.setItem(KEY, JSON.stringify(activos));
                 } catch (e) { /* silencioso */ }
             }
-            localStorage.removeItem('token');
-            localStorage.removeItem('rol');
-            localStorage.removeItem('nombre');
+            sessionStorage.removeItem('token');
+            sessionStorage.removeItem('rol');
+            sessionStorage.removeItem('nombre');
             window.location.href = '../../Principal/HTML/index.html';
         });
 

@@ -47,6 +47,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/productos/**").permitAll()
 
                         // ── Mesas: lectura pública (el cliente necesita verlas al pedir) ──
+                        // Incluye /api/mesas/{id}/pedidos, así cualquier mozo puede VER todas
+                        // las mesas con sus pedidos, aunque solo pueda operar la suya (se valida en el servicio).
                         .requestMatchers(HttpMethod.GET, "/api/mesas/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/mesas/**")
                         .hasAnyRole("MESERO", "Mesero", "mesero", "ADMINISTRADOR", "Administrador", "administrador")
@@ -61,6 +63,10 @@ public class SecurityConfig {
                         .hasAnyRole("MESERO", "Mesero", "mesero", "ADMINISTRADOR", "Administrador", "administrador", "COCINERO", "Cocinero", "cocinero")
                         .requestMatchers(HttpMethod.PUT, "/api/pedidos/*/detalles/*/estado")
                         .hasAnyRole("COCINERO", "Cocinero", "cocinero", "ADMINISTRADOR", "Administrador", "administrador")
+
+                        // ── Facturas (cobrar) ──
+                        .requestMatchers(HttpMethod.POST, "/api/facturas/**")
+                        .hasAnyRole("MESERO", "Mesero", "mesero", "ADMINISTRADOR", "Administrador", "administrador")
 
                         // ── Productos ──
                         .requestMatchers(HttpMethod.POST, "/api/productos/**")

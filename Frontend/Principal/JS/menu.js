@@ -1,4 +1,5 @@
 
+
 const PRODUCTS_API_URL = `${API_BASE_URL}/productos`;
 const ORDERS_API_URL = `${API_BASE_URL}/pedidos`;
 const categoryConfig = {
@@ -267,7 +268,7 @@ if (submitOrderButton) {
             return;
         }
         
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         if (!token) {
             alert("Por favor, inicia sesión para realizar un pedido.");
             return;

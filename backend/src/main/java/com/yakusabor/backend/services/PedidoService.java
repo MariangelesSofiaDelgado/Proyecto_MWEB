@@ -45,7 +45,20 @@ private static final List<String> ESTADOS_FACTURABLES =
                 .toList();
     }
 
-    public PedidoResponse crearPedido(Map<String, Object> request) {
+    // Historial completo de pedidos de una mesa (cualquier estado).
+    // Cualquier usuario autenticado del staff puede VER esto (mozos ven todas las mesas),
+    // la restricción de "atender/cobrar" se aplica solo al crear/actualizar/facturar.
+    public List<PedidoDashboardResponse> listarPedidosPorMesa(Integer mesaId) {
+        if (!mesaRepository.existsById(mesaId)) {
+            throw new IllegalArgumentException("Mesa no encontrada.");
+        }
+        return pedidoRepository.findByMesa_Id(mesaId).stream()
+                .sorted(Comparator.comparing(Pedido::getCreatedAt).reversed())
+                .map(this::mapPedidoDashboard)
+                .toList();
+    }
+
+    public PedidoResponse crearPedido(Map<String, Object> request, Usuario actor) {
         List<Map<String, Object>> items = getItems(request);
         if (items.isEmpty()) {
             throw new IllegalArgumentException("El pedido debe tener al menos un producto.");
@@ -56,13 +69,28 @@ private static final List<String> ESTADOS_FACTURABLES =
         pedido.setTipo(tipo);
         pedido.setEstado("nuevo");
 
+        Mesa mesa = null;
         if ("presencial".equals(tipo)) {
             Integer mesaId = getInteger(request, "mesaId", "mesa_id");
             if (mesaId == null) {
                 throw new IllegalArgumentException("Debes seleccionar una mesa para pedidos presenciales.");
             }
-            Mesa mesa = mesaRepository.findById(mesaId)
+            mesa = mesaRepository.findById(mesaId)
                     .orElseThrow(() -> new IllegalArgumentException("La mesa seleccionada no existe."));
+
+            // Un mozo solo puede enviar pedidos a mesas que él atiende.
+            // Si la mesa todavía no tiene mozo asignado, se la auto-asigna (equivale a "elegir atenderla").
+            // Esto NO aplica a Clientes (piden desde la carta pública) ni a Cocineros.
+            if (esMesero(actor)) {
+                if (mesa.getMesero() == null) {
+                    mesa.setMesero(actor);
+                } else if (!mesa.getMesero().getId().equals(actor.getId())) {
+                    throw new IllegalArgumentException(
+                            "Esta mesa está siendo atendida por " + mesa.getMesero().getNombre()
+                                    + ". Solo puedes enviar pedidos a mesas asignadas a ti.");
+                }
+            }
+
             mesa.setEstado("ocupada");
             mesaRepository.save(mesa);
             pedido.setMesa(mesa);
@@ -74,11 +102,21 @@ private static final List<String> ESTADOS_FACTURABLES =
             pedido.setDireccionDelivery(direccion);
         }
 
-        Integer meseroId = getInteger(request, "meseroId", "mesero_id");
-        if (meseroId != null) {
-            Usuario mesero = usuarioRepository.findById(meseroId)
-                    .orElseThrow(() -> new IllegalArgumentException("El mesero seleccionado no existe."));
-            pedido.setMesero(mesero);
+        // El mesero del pedido se determina así:
+        //  - Si quien crea el pedido es un mozo, el pedido queda a su nombre (no confiamos en el body).
+        //  - Si es un administrador o un cliente/cocinero, se respeta el mozo asignado a la mesa (si existe)
+        //    o el meseroId enviado explícitamente en el body.
+        if (esMesero(actor)) {
+            pedido.setMesero(actor);
+        } else if (mesa != null && mesa.getMesero() != null) {
+            pedido.setMesero(mesa.getMesero());
+        } else {
+            Integer meseroId = getInteger(request, "meseroId", "mesero_id");
+            if (meseroId != null) {
+                Usuario mesero = usuarioRepository.findById(meseroId)
+                        .orElseThrow(() -> new IllegalArgumentException("El mesero seleccionado no existe."));
+                pedido.setMesero(mesero);
+            }
         }
 
         BigDecimal totalCalculado = BigDecimal.ZERO;
@@ -121,9 +159,11 @@ private static final List<String> ESTADOS_FACTURABLES =
                 guardado.getTotal(), guardado.getCreatedAt(), "Pedido registrado correctamente.");
     }
 
-    public PedidoDashboardResponse actualizarEstado(Integer id, String estadoSolicitado) {
+    public PedidoDashboardResponse actualizarEstado(Integer id, String estadoSolicitado, Usuario actor) {
         Pedido pedido = pedidoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("El pedido seleccionado no existe."));
+
+        verificarPermisoSobreMesa(pedido.getMesa(), actor);
 
         String nuevoEstado = normalizarEstado(estadoSolicitado);
         pedido.setEstado(nuevoEstado);
@@ -179,7 +219,11 @@ private static final List<String> ESTADOS_FACTURABLES =
     return new CuentaMesaResponse(mesa.getId(), mesa.getCodigo(), total, pedidosDto);
 }
 
-public CuentaMesaResponse generarFactura(Integer mesaId) {
+public CuentaMesaResponse generarFactura(Integer mesaId, Usuario actor) {
+    Mesa mesa = mesaRepository.findById(mesaId)
+            .orElseThrow(() -> new IllegalArgumentException("Mesa no encontrada."));
+    verificarPermisoSobreMesa(mesa, actor);
+
     CuentaMesaResponse cuenta = obtenerCuentaMesa(mesaId); // valida y trae todo
 
     List<Pedido> activos = pedidoRepository.findByMesa_Id(mesaId).stream()
@@ -191,12 +235,32 @@ public CuentaMesaResponse generarFactura(Integer mesaId) {
         pedidoRepository.save(p);
     });
 
-    Mesa mesa = mesaRepository.findById(mesaId).orElseThrow();
     mesa.setEstado("libre");
+    mesa.setMesero(null); // al cobrar, la mesa queda libre para que cualquier mozo la tome de nuevo
     mesaRepository.save(mesa);
 
     return cuenta; // devuelve el detalle ya facturado, para imprimir
 }
+
+    // ── Control de acceso por mesa ──
+    // Un ADMINISTRADOR puede atender/cobrar cualquier mesa.
+    // Un MOZO solo puede atender/cobrar la mesa que tiene asignada a su nombre.
+    // Otros roles (Cliente, Cocinero) no están sujetos a esta regla.
+    private void verificarPermisoSobreMesa(Mesa mesa, Usuario actor) {
+        if (mesa == null || actor == null) return;
+        if (!esMesero(actor)) return; // solo restringe a mozos
+
+        if (mesa.getMesero() == null || !mesa.getMesero().getId().equals(actor.getId())) {
+            throw new IllegalArgumentException(
+                    "No tienes esta mesa asignada. Debes atenderla primero desde Gestión de Sala.");
+        }
+    }
+
+    private boolean esMesero(Usuario usuario) {
+        return usuario != null && usuario.getRol() != null
+                && "mesero".equalsIgnoreCase(usuario.getRol().getNombre());
+    }
+
     // ── Helpers ──
     private String normalizarTipo(String tipoPedido) {
         String tipo = tipoPedido == null ? "presencial" : tipoPedido.trim().toLowerCase();

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 
@@ -8,6 +9,32 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
   <link rel="stylesheet" href="../CSS/styledash.css">
+  <style>
+    .mesa-owner-strip {
+      font-size:.82rem; border-radius:10px; padding:8px 14px; margin-bottom:14px;
+      display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+    }
+    .owner-mio    { background:#dcfce7; color:#15803d; border:1px solid #86efac; }
+    .owner-libre  { background:#e8f1fb; color:#1b3a57; border:1px solid #c9daef; }
+    .owner-otro   { background:#fef3c7; color:#92400e; border:1px solid #fcd34d; }
+    .btn-atender-mesa {
+      background:#1b3a57; color:#fff; border:none; border-radius:8px;
+      font-size:.78rem; font-weight:700; padding:5px 14px; cursor:pointer;
+    }
+    .historial-card { border-radius:12px; border:1px solid #e2e8f0; margin-bottom:16px; }
+    .historial-header {
+      padding:10px 14px; font-weight:700; font-size:.85rem; color:#1b3a57;
+      display:flex; justify-content:space-between; align-items:center; cursor:pointer;
+    }
+    .historial-body { padding:0 14px 12px; font-size:.82rem; }
+    .historial-pedido {
+      border-top:1px solid #f1f5f9; padding:8px 0; display:flex; flex-direction:column; gap:2px;
+    }
+    .historial-pedido .fila { display:flex; justify-content:space-between; color:#475569; }
+    .historial-estado {
+      font-size:.68rem; font-weight:700; padding:2px 8px; border-radius:999px; text-transform:capitalize;
+    }
+  </style>
 </head>
 
 <body>
@@ -21,6 +48,20 @@
           </p>
         </div>
         <a href="Gestion DeSala.html" class="btn btn-light fw-semibold">← Volver a Sala</a>
+      </div>
+    </div>
+
+    <!-- Estado de asignación de la mesa -->
+    <div id="ownerStrip" class="mesa-owner-strip owner-libre" style="display:none;"></div>
+
+    <!-- Historial de pedidos de esta mesa -->
+    <div class="card historial-card">
+      <div class="historial-header" id="historialToggle">
+        <span>🧾 Pedidos de esta mesa <span id="historialCount" class="text-muted" style="font-weight:500;"></span></span>
+        <span id="historialCaret">▾</span>
+      </div>
+      <div class="historial-body" id="historialBody" style="display:none;">
+        <div id="historialContenido" class="text-muted">Cargando historial…</div>
       </div>
     </div>
 
@@ -99,6 +140,11 @@
     const API_PEDIDOS = `${API_BASE}/pedidos`;
     const API_MESAS = `${API_BASE}/mesas`;
 
+    // ── Sesión actual ───────────────────────────────────────────
+    const rolActual = (sessionStorage.getItem("rol") || "").trim().toLowerCase();
+    const userId = parseInt(sessionStorage.getItem("userId") || "0", 10) || null;
+    const esAdmin = rolActual.includes("admin");
+    const esMesero = rolActual.includes("mesero");
 
     // ── Parámetros de URL ──────────────────────────────────────
     const params = new URLSearchParams(window.location.search);
@@ -110,7 +156,7 @@
 
     // ── Auth headers ───────────────────────────────────────────
     function authHeaders() {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       return {
         "Content-Type": "application/json",
         ...(token ? { Authorization: `Bearer ${token}` } : {})
@@ -169,7 +215,8 @@
 
       countEl.textContent = String(count);
       totalEl.textContent = fmt(total);
-      sendBtn.disabled = false;
+      // El botón solo se habilita si el usuario tiene permiso sobre la mesa (ver puedeOperar()).
+      sendBtn.disabled = !puedeOperar();
     }
 
     // ── Feedback inline ────────────────────────────────────────
@@ -184,6 +231,132 @@
 
     function hideFeedback() {
       document.getElementById("kitchen-feedback").style.display = "none";
+    }
+
+    // ── Estado de asignación de la mesa (mozo responsable) ─────
+    let mesaInfo = null; // { id, codigo, estado, meseroId, meseroNombre, ... }
+
+    function puedeOperar() {
+      // El admin siempre puede. Un cliente/rol desconocido no debería llegar aquí,
+      // pero por seguridad la validación real y definitiva ocurre en el backend.
+      if (esAdmin) return true;
+      if (!esMesero) return false;
+      if (!mesaInfo) return true; // aún no resolvimos la info; el backend validará igual
+      return !mesaInfo.meseroId || mesaInfo.meseroId === userId;
+    }
+
+    function renderOwnerStrip() {
+      const strip = document.getElementById("ownerStrip");
+      if (!mesaInfo) { strip.style.display = "none"; return; }
+
+      strip.style.display = "flex";
+      strip.classList.remove("owner-mio", "owner-libre", "owner-otro");
+
+      if (!mesaInfo.meseroId) {
+        strip.classList.add("owner-libre");
+        strip.innerHTML = esMesero
+          ? `🪑 Esta mesa no tiene mozo asignado. <button class="btn-atender-mesa" id="btnAtenderAqui">Atender esta mesa</button>`
+          : `🪑 Esta mesa no tiene mozo asignado todavía.`;
+      } else if (esMesero && mesaInfo.meseroId === userId) {
+        strip.classList.add("owner-mio");
+        strip.innerHTML = `✔ Tú estás atendiendo esta mesa.`;
+      } else {
+        strip.classList.add("owner-otro");
+        strip.innerHTML = `👤 Esta mesa está siendo atendida por <strong>${mesaInfo.meseroNombre || "otro mozo"}</strong>. Puedes ver sus pedidos, pero no puedes agregar productos ni cobrar.`;
+      }
+
+      const btnAtender = document.getElementById("btnAtenderAqui");
+      if (btnAtender) {
+        btnAtender.addEventListener("click", atenderMesaDesdeAqui);
+      }
+    }
+
+    async function atenderMesaDesdeAqui() {
+      try {
+        const idMesa = await resolveMesaId();
+        const res = await fetch(`${API_MESAS}/${idMesa}/asignar`, {
+          method: "PUT",
+          headers: authHeaders(),
+          body: JSON.stringify({ meseroId: userId })
+        });
+        if (!res.ok) throw new Error(await res.text());
+        mesaInfo = await res.json();
+        renderOwnerStrip();
+        renderTicket();
+        showFeedback("✅ Ahora tú atiendes esta mesa.", "success");
+      } catch (err) {
+        showFeedback(`❌ ${err.message}`, "danger");
+      }
+    }
+
+    async function cargarInfoMesa() {
+      try {
+        const idMesa = await resolveMesaId();
+        if (!idMesa) return;
+        const res = await fetch(`${API_MESAS}/estado`, { headers: authHeaders() });
+        if (!res.ok) return;
+        const todas = await res.json();
+        mesaInfo = todas.find(m => m.id === idMesa) || null;
+      } catch { /* silencioso */ }
+      renderOwnerStrip();
+      renderTicket();
+    }
+
+    // ── Historial de pedidos de la mesa ─────────────────────────
+    document.getElementById("historialToggle").addEventListener("click", () => {
+      const body = document.getElementById("historialBody");
+      const caret = document.getElementById("historialCaret");
+      const abierto = body.style.display !== "none";
+      body.style.display = abierto ? "none" : "block";
+      caret.textContent = abierto ? "▾" : "▴";
+    });
+
+    function badgeEstadoPedido(estado) {
+      const colores = {
+        nuevo: ["#fef9c3", "#a16207"], en_preparacion: ["#fef3c7", "#b45309"],
+        listo: ["#dbeafe", "#1d4ed8"], entregado: ["#dcfce7", "#15803d"],
+        facturado: ["#e2e8f0", "#475569"], cancelado: ["#fee2e2", "#dc2626"]
+      };
+      const [bg, fg] = colores[estado] || ["#f1f5f9", "#64748b"];
+      return `<span class="historial-estado" style="background:${bg};color:${fg}">${(estado||"").replace("_"," ")}</span>`;
+    }
+
+    async function cargarHistorialPedidos() {
+      const cont = document.getElementById("historialContenido");
+      try {
+        const idMesa = await resolveMesaId();
+        if (!idMesa) { cont.textContent = "No se pudo identificar la mesa."; return; }
+
+        const res = await fetch(`${API_MESAS}/${idMesa}/pedidos`, { headers: authHeaders() });
+        if (!res.ok) throw new Error(await res.text());
+        const pedidos = await res.json();
+
+        document.getElementById("historialCount").textContent = pedidos.length ? `(${pedidos.length})` : "";
+
+        if (!pedidos.length) {
+          cont.innerHTML = `<div class="text-muted">Aún no se han registrado pedidos en esta mesa.</div>`;
+          return;
+        }
+
+        cont.innerHTML = pedidos.map(p => {
+          const items = (p.detalles || []).map(d => `${d.cantidad}× ${d.nombreProducto || d.productoNombre || ""}`).join(", ");
+          const fecha = p.createdAt ? new Date(p.createdAt).toLocaleString("es-PE") : "";
+          return `
+            <div class="historial-pedido">
+              <div class="fila">
+                <span><strong>Pedido #${p.id}</strong> — ${p.meseroNombre || "Sin mozo"}</span>
+                ${badgeEstadoPedido(p.estado)}
+              </div>
+              <div class="fila">
+                <span>${items || "Sin detalle"}</span>
+                <strong>${fmt(p.total || 0)}</strong>
+              </div>
+              <div class="text-muted" style="font-size:.72rem;">${fecha}</div>
+            </div>`;
+        }).join("");
+      } catch (err) {
+        cont.innerHTML = `<div class="text-danger">⚠️ No se pudo cargar el historial: ${err.message}</div>`;
+      }
     }
 
     // ── Buscar mesaId real por código si no viene en la URL ───
@@ -206,6 +379,10 @@
     // ── Enviar pedido a cocina ─────────────────────────────────
     document.getElementById("btnEnviarCocina").addEventListener("click", async () => {
       if (!ticketState.size) return;
+      if (!puedeOperar()) {
+        showFeedback("❌ No puedes enviar pedidos: esta mesa está asignada a otro mozo.", "danger");
+        return;
+      }
 
       const btn = document.getElementById("btnEnviarCocina");
       btn.disabled = true;
@@ -250,10 +427,14 @@
         ticketState.clear();
         renderTicket();
 
+        // Refrescar info de la mesa (por si el envío auto-asignó al mozo) e historial
+        await cargarInfoMesa();
+        await cargarHistorialPedidos();
+
       } catch (err) {
         showFeedback(`❌ ${err.message}`, "danger");
       } finally {
-        btn.disabled = false;
+        btn.disabled = false || !puedeOperar();
         btn.innerHTML = "🍳 Enviar a Cocina";
       }
     });
@@ -348,9 +529,11 @@
     // ── Init ───────────────────────────────────────────────────
     renderTicket();
     cargarProductos();
-    resolveMesaId(); // pre-resolver el ID
+    cargarInfoMesa();
+    cargarHistorialPedidos();
 
   </script>
 </body>
 
 </html>
+

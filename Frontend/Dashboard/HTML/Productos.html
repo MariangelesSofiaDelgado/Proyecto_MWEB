@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 
@@ -187,7 +188,7 @@
         const API_BASE_URL = resolveApiBaseUrl();
 
         function authHeaders() {
-            const token = localStorage.getItem("token");
+            const token = sessionStorage.getItem("token");
             return {
                 "Content-Type": "application/json",
                 ...(token ? { Authorization: `Bearer ${token}` } : {})

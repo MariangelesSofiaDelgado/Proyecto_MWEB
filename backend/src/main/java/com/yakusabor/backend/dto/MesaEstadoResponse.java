@@ -11,4 +11,8 @@ public class MesaEstadoResponse {
     private String ubicacion;
     private String estado;
     private Boolean libre;
+
+    // Mozo actualmente asignado a la mesa (null si nadie la está atendiendo)
+    private Integer meseroId;
+    private String meseroNombre;
 }

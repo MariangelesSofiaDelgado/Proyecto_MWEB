@@ -1,3 +1,4 @@
+
 // ── Config ─────────────────────────────────────────────────
         function resolveApiBaseUrl() {
             const override = window.__API_BASE_URL__ || localStorage.getItem("apiBaseUrl");
@@ -14,7 +15,7 @@
         const API = resolveApiBaseUrl();
 
         function authHeaders() {
-            const token = localStorage.getItem("token");
+            const token = sessionStorage.getItem("token");
             return {
                 "Content-Type": "application/json",
                 ...(token ? { Authorization: `Bearer ${token}` } : {})
